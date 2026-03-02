@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "../../.."
+		},
+		{
+			"path": "../../../../eventuais-frontend"
+		},
+		{
+			"path": "../../../../eventuais-backend"
+		}
+	],
+	"settings": {}
+}
