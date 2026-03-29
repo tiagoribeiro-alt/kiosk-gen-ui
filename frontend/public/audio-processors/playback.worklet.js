@@ -4,12 +4,17 @@ class PlaybackWorklet extends AudioWorkletProcessor {
     this.queue = [];
     this.currentBuffer = null;
     this.currentIndex = 0;
+    this.isPlaying = false;
     
     this.port.onmessage = (event) => {
       if (event.data === 'clear') {
         this.queue = [];
         this.currentBuffer = null;
         this.currentIndex = 0;
+        if (this.isPlaying) {
+          this.isPlaying = false;
+          this.port.postMessage({ type: 'playback-state', isPlaying: false });
+        }
       } else if (event.data instanceof Float32Array) {
         this.queue.push(event.data);
       }
@@ -20,6 +25,11 @@ class PlaybackWorklet extends AudioWorkletProcessor {
     const output = outputs[0];
     const channel = output[0];
     if (!channel) return true;
+
+    if (this.queue.length > 0 && !this.isPlaying) {
+      this.isPlaying = true;
+      this.port.postMessage({ type: 'playback-state', isPlaying: true });
+    }
 
     for (let i = 0; i < channel.length; i++) {
         if (!this.currentBuffer || this.currentIndex >= this.currentBuffer.length) {
@@ -37,8 +47,12 @@ class PlaybackWorklet extends AudioWorkletProcessor {
             channel[i] = 0;
         }
     }
+
+    if (!this.currentBuffer && this.queue.length === 0 && this.isPlaying) {
+      this.isPlaying = false;
+      this.port.postMessage({ type: 'playback-state', isPlaying: false });
+    }
     
-    // Notify main thread if playing state changed (could emit events)
     return true;
   }
 }

@@ -1,1 +1,26 @@
 @import "tailwindcss";
+
+@layer base {
+	:root {
+		color-scheme: light;
+	}
+
+	html {
+		background-color: rgb(248 250 252);
+	}
+
+	body {
+		min-height: 100vh;
+		background:
+			radial-gradient(circle at top, rgb(255 255 255) 0%, rgb(248 250 252) 48%, rgb(241 245 249) 100%);
+		color: rgb(30 41 59);
+		text-rendering: optimizeLegibility;
+		-webkit-font-smoothing: antialiased;
+		-moz-osx-font-smoothing: grayscale;
+	}
+
+	body,
+	#root {
+		min-height: 100vh;
+	}
+}
