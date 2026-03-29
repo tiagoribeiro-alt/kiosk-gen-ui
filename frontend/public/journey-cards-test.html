@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Way Finder UI Catalog</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg-top: #f8fafc;
+      --bg-mid: #ffffff;
+      --bg-bottom: #f8fafc;
+      --text-strong: #0f172a;
+      --text-body: #475569;
+      --text-soft: #94a3b8;
+      --line-card: rgba(226, 232, 240, 0.72);
+      --surface: rgba(255, 255, 255, 0.88);
+      --shadow-card: 0 14px 32px -24px rgba(15, 23, 42, 0.2);
+      --shadow-focus: 0 20px 40px -24px rgba(15, 23, 42, 0.22);
+      --shadow-soft: 0 18px 36px -28px rgba(15, 23, 42, 0.2);
+      --rose: #be123c;
+      --rose-soft: #fff1f2;
+      --font-ui: "Segoe UI", "SF Pro Text", "Helvetica Neue", sans-serif;
+      --font-brand: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+      --radius-shell: 32px;
+      --radius-card: 22px;
+      --radius-media: 16px;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-ui);
+      color: var(--text-strong);
+      background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 56%, var(--bg-bottom) 100%);
+    }
+    img { display: block; width: 100%; height: auto; }
+
+    .page {
+      width: min(1480px, calc(100vw - 48px));
+      margin: 0 auto;
+      padding: 28px 0 56px;
+    }
+    .hero {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      gap: 24px;
+      margin-bottom: 28px;
+    }
+    .hero__title {
+      margin: 0;
+      font-family: var(--font-brand);
+      font-size: clamp(2.6rem, 4vw, 4.2rem);
+      font-weight: 400;
+      line-height: 0.96;
+      letter-spacing: -0.04em;
+    }
+    .hero__body {
+      max-width: 760px;
+      margin-top: 14px;
+      font-size: 1.02rem;
+      line-height: 1.8;
+      color: var(--text-body);
+    }
+    .hero__chips, .chip-row, .empty-state__chips, .event-tokens {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    .hero__chip, .empty-state__chip, .event-token, .summary-link, .status-row, .kind-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      border-radius: 999px;
+    }
+    .hero__chip, .kind-tag {
+      border: 1px solid rgba(186, 230, 253, 0.8);
+      background: rgba(255, 255, 255, 0.86);
+      padding: 10px 14px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: #0f172a;
+      box-shadow: 0 10px 22px -20px rgba(59, 130, 246, 0.35);
+    }
+    .section {
+      margin-top: 24px;
+      padding: 24px;
+      border: 1px solid var(--line-card);
+      border-radius: var(--radius-shell);
+      background: rgba(255, 255, 255, 0.68);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(12px);
+    }
+    .section__eyebrow {
+      margin: 0;
+      font-size: 0.74rem;
+      font-weight: 700;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+    }
+    .section__title {
+      margin: 10px 0 0;
+      font-size: 1.7rem;
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+    }
+    .section__body {
+      max-width: 900px;
+      margin: 12px 0 0;
+      color: var(--text-body);
+      line-height: 1.8;
+    }
+    .section__grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(238px, 1fr));
+      gap: 18px;
+      margin-top: 22px;
+    }
+    .catalog-card {
+      padding: 18px;
+      border: 1px solid var(--line-card);
+      border-radius: 24px;
+      background: rgba(248, 250, 252, 0.65);
+    }
+    .catalog-card__head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+    .catalog-card__label {
+      font-size: 0.78rem;
+      color: var(--text-body);
+      line-height: 1.6;
+    }
+    .kind-tag {
+      padding: 8px 12px;
+      font-size: 0.74rem;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: #0369a1;
+    }
+
+    .journey-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      width: 100%;
+      padding: 16px;
+      border: 1px solid rgba(226, 232, 240, 0.72);
+      border-radius: var(--radius-card);
+      background: var(--surface);
+      box-shadow: var(--shadow-card);
+      backdrop-filter: blur(10px);
+      color: var(--text-strong);
+      opacity: 0.95;
+      transition: transform 200ms ease, box-shadow 200ms ease, border-color 200ms ease, opacity 200ms ease;
+    }
+    .journey-card--focused {
+      transform: scale(1.015);
+      border-color: rgba(203, 213, 225, 0.9);
+      box-shadow: var(--shadow-focus);
+    }
+    .journey-card--base { min-width: 13rem; max-width: 13.5rem; min-height: 13.8rem; }
+    .journey-card--compact { min-width: 11.5rem; max-width: 12rem; min-height: 12.2rem; }
+    .journey-card--tall { min-width: 13rem; max-width: 13.5rem; min-height: 14.6rem; }
+    .journey-card--wide { min-width: 16.5rem; max-width: 17rem; min-height: 14.2rem; }
+    .journey-card--hero { min-width: 17rem; max-width: 18.5rem; min-height: 20rem; }
+    .journey-card__title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 500;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+      color: var(--text-strong);
+    }
+    .journey-card__meta,
+    .journey-card__caption,
+    .journey-card__attribution,
+    .journey-card__summary,
+    .journey-card__weather-range,
+    .journey-card__weather-feels,
+    .journey-card__weather-day-meta,
+    .map-preview__hint,
+    .map-preview__fallback-body,
+    .qr-card__caption,
+    .qr-card__code {
+      margin: 0;
+      color: var(--text-body);
+    }
+    .journey-card__meta { margin-top: 4px; font-size: 0.88rem; line-height: 1.5; }
+    .journey-card__caption { margin-top: 8px; font-size: 0.82rem; line-height: 1.55; }
+    .journey-card__attribution { margin-top: 6px; font-size: 0.72rem; line-height: 1.4; color: #94a3b8; }
+    .journey-card__eyebrow {
+      margin: 0 0 12px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+    .event-token {
+      padding: 6px 12px;
+      border: 1px solid #fde68a;
+      background: #fffbeb;
+      color: #92400e;
+      font-size: 0.75rem;
+      font-weight: 600;
+      line-height: 1;
+    }
+    .journey-card__summary { margin-top: 16px; font-size: 0.94rem; line-height: 1.7; }
+    .summary-link {
+      margin-top: 18px;
+      padding: 8px 12px;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      background: #f8fafc;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-body);
+      width: fit-content;
+    }
+
+    .media-frame, .map-preview, .qr-card__panel, .wave-card {
+      overflow: hidden;
+      border-radius: var(--radius-media);
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      background: rgba(248, 250, 252, 0.9);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+    }
+    .media-frame { margin-bottom: 12px; }
+    .media-image, .media-scenic { aspect-ratio: 1 / 1; width: 100%; }
+    .media-image { object-fit: cover; }
+    .media-scenic {
+      position: relative;
+      background: linear-gradient(180deg, #e0f2fe 0%, #f0fdf4 52%, #dcfce7 100%);
+    }
+    .media-scenic::before {
+      content: "";
+      position: absolute;
+      inset-inline: 0;
+      bottom: 0;
+      height: 48%;
+      background: radial-gradient(circle at center, rgba(34, 197, 94, 0.18), rgba(255, 255, 255, 0) 72%);
+    }
+    .media-scenic::after {
+      content: "";
+      position: absolute;
+      bottom: 0;
+      left: -6%;
+      width: 112%;
+      height: 42%;
+      border-radius: 100% 100% 0 0;
+      background: linear-gradient(180deg, rgba(34, 197, 94, 0.12), rgba(21, 128, 61, 0.28));
+    }
+
+    .weather-card { justify-content: space-between; }
+    .weather-card__current {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-top: 4px;
+      text-align: center;
+    }
+    .weather-card__main {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+    }
+    .weather-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 999px;
+      background: radial-gradient(circle at top, #fde68a 0%, #fef3c7 55%, #ffffff 100%);
+      box-shadow: 0 10px 24px -16px rgba(251, 191, 36, 0.8);
+    }
+    .weather-card__summary-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 4px;
+    }
+    .weather-card__summary {
+      font-size: 0.96rem;
+      font-weight: 600;
+      line-height: 1.2;
+    }
+    .weather-card__temp {
+      font-size: 2.15rem;
+      font-weight: 400;
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+    .journey-card__weather-range { margin-top: 3px; font-size: 0.85rem; line-height: 1.5; }
+    .journey-card__weather-feels { margin-top: 8px; font-size: 0.78rem; text-align: center; }
+    .weather-card__grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 6px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    .weather-card__day { text-align: center; }
+    .weather-card__day-label {
+      margin: 0;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #334155;
+    }
+    .weather-card__day-temps { margin: 4px 0 0; font-size: 0.78rem; line-height: 1.35; }
+    .journey-card__weather-day-meta { margin-top: 2px; font-size: 0.68rem; line-height: 1.2; }
+
+    .qr-card__panel {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 16px;
+      border-color: rgba(226, 232, 240, 0.8);
+      background: rgba(248, 250, 252, 0.9);
+    }
+    .qr-card__canvas {
+      width: 192px;
+      height: 192px;
+      border-radius: 22px;
+      background: white;
+      padding: 10px;
+      box-shadow: 0 12px 28px -22px rgba(15, 23, 42, 0.26);
+    }
+    .qr-card__caption { margin-top: 16px; font-size: 0.95rem; line-height: 1.6; text-align: center; }
+    .qr-card__code { margin-top: 12px; font-size: 0.78rem; line-height: 1.5; text-align: center; color: #94a3b8; }
+
+    .map-preview {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      margin-bottom: 12px;
+      background: linear-gradient(180deg, #f8fafc 0%, #f4f7fb 48%, #eef3f8 100%);
+    }
+    .map-preview::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 42%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(248, 250, 252, 0.24) 100%);
+    }
+    .map-preview__contour,
+    .map-preview__contour--secondary,
+    .map-preview__grid,
+    .map-preview__top,
+    .map-preview__bottom,
+    .map-preview__fallback,
+    .map-preview__marker-cluster { position: absolute; }
+    .map-preview__contour {
+      left: -4%; top: 20%; width: 112%; height: 34%; border-radius: 999px; border: 1px solid rgba(148, 163, 184, 0.5);
+    }
+    .map-preview__contour--secondary {
+      left: -10%; top: 44%; width: 124%; height: 38%; border-radius: 999px; border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+    .map-preview__grid {
+      inset: 0; opacity: 0.4;
+      background-image:
+        linear-gradient(to right, rgba(148, 163, 184, 0.12) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+      background-size: 18px 18px;
+    }
+    .map-preview__top {
+      inset-inline: 12px; top: 12px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; z-index: 1;
+    }
+    .map-preview__bottom { inset-inline: 12px; bottom: 12px; z-index: 1; }
+    .map-preview__eyebrow {
+      margin: 0; font-size: 0.64rem; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-body);
+    }
+    .map-preview__scale {
+      padding: 4px 10px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.8); background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 8px 18px -16px rgba(15, 23, 42, 0.24); font-size: 0.64rem; font-weight: 600; color: var(--text-body); white-space: nowrap;
+    }
+    .map-preview__marker-cluster {
+      left: 50%; top: 48%; transform: translate(-50%, -50%); display: flex; align-items: center; justify-content: center; z-index: 1;
+    }
+    .map-preview__marker-pulse {
+      position: absolute; width: 40px; height: 40px; border-radius: 999px; background: rgba(186, 230, 253, 0.6); filter: blur(1px);
+    }
+    .map-preview__marker {
+      position: relative; width: 16px; height: 16px; border-radius: 999px; border: 2px solid white; background: #0284c7;
+      box-shadow: 0 6px 14px -8px rgba(2, 132, 199, 0.7);
+    }
+    .map-preview__label {
+      margin: 0; font-size: 0.86rem; font-weight: 600; line-height: 1.25; color: #1e293b;
+    }
+    .map-preview__hint { margin-top: 4px; font-size: 0.72rem; line-height: 1.4; }
+    .map-preview--fallback { display: grid; place-items: center; background: linear-gradient(180deg, #f8fafc 0%, #f3f6f9 100%); }
+    .map-preview__fallback { inset: 0; display: grid; place-items: center; padding: 16px; text-align: center; z-index: 1; }
+    .map-preview__fallback-icon {
+      display: grid; place-items: center; width: 56px; height: 56px; border-radius: 999px; border: 1px solid rgba(226, 232, 240, 0.9); background: white;
+      color: #94a3b8; box-shadow: 0 10px 20px -16px rgba(15, 23, 42, 0.24);
+    }
+    .map-preview__fallback-title { margin: 12px 0 0; font-size: 0.9rem; font-weight: 600; line-height: 1.3; color: #1e293b; }
+    .map-preview__fallback-body { margin-top: 8px; max-width: 10rem; font-size: 0.76rem; line-height: 1.6; }
+
+    .shell-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 20px; margin-top: 22px;
+    }
+    .shell {
+      display: grid; min-height: 800px; grid-template-rows: 14fr 64fr 22fr; overflow: hidden; border: 1px solid var(--line-card);
+      border-radius: 32px; background: linear-gradient(180deg, #f8fafc 0%, #ffffff 56%, #f8fafc 100%); box-shadow: var(--shadow-soft);
+    }
+    .shell__header {
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; padding: 28px 28px 16px;
+    }
+    .shell__header--idle { pointer-events: none; opacity: 0; }
+    .shell__brand-image {
+      width: 8.5rem; height: auto; object-fit: contain;
+    }
+    .status-row {
+      padding: 10px 16px; border: 1px solid rgba(220, 252, 231, 0.95); background: rgba(236, 253, 245, 0.9); font-size: 0.95rem; font-weight: 600;
+      color: #047857; box-shadow: 0 12px 26px -22px rgba(22, 163, 74, 0.45);
+    }
+    .status-row--disconnected {
+      border-color: rgba(226, 232, 240, 0.95); background: rgba(248, 250, 252, 0.96); color: var(--text-body);
+    }
+    .status-dot { width: 10px; height: 10px; border-radius: 999px; background: #10b981; }
+    .status-dot--disconnected { background: #cbd5e1; }
+    .shell__timeline { position: relative; padding: 8px 22px; overflow: hidden; }
+    .shell__footer { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 12px 24px 28px; gap: 12px; }
+
+    .timeline-frame {
+      position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; overflow: hidden;
+    }
+    .timeline-track {
+      position: relative; display: flex; align-items: center; gap: 24px; width: 100%; height: 100%; padding: 20px 18px;
+    }
+    .timeline-slot { position: relative; display: flex; justify-content: center; flex: 1 1 0; }
+    .offset-0 { margin-top: 32px; }
+    .offset-1 { margin-top: 0; }
+    .offset-2 { margin-top: 16px; }
+    .offset-3 { margin-top: 40px; }
+    .journey-connector {
+      position: absolute; inset-inline: 0; top: 50%; width: 100%; height: 144px; transform: translateY(-50%); overflow: visible; pointer-events: none;
+    }
+
+    .empty-state {
+      display: flex; flex-direction: column; align-items: center; justify-content: center; width: 100%; height: 100%; max-width: 62rem; padding: 40px;
+      border: 1px solid rgba(226, 232, 240, 0.72); border-radius: 34px; background: radial-gradient(circle at top, #ffffff 0%, #f8fafc 62%, #eff6ff 100%);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.72); text-align: center;
+    }
+    .empty-state__eyebrow {
+      margin: 0; font-size: 0.7rem; font-weight: 700; letter-spacing: 0.32em; text-transform: uppercase; color: #0284c7;
+    }
+    .empty-state__title {
+      margin: 18px 0 0; max-width: 44rem; font-size: 2.35rem; font-weight: 600; line-height: 1.12; letter-spacing: -0.04em;
+    }
+    .empty-state__description {
+      margin: 16px 0 0; max-width: 46rem; font-size: 1.02rem; line-height: 1.8; color: var(--text-body);
+    }
+    .empty-state__chips { justify-content: center; margin-top: 22px; }
+    .empty-state__chip {
+      padding: 10px 16px; border: 1px solid rgba(186, 230, 253, 0.95); background: rgba(255, 255, 255, 0.9); font-size: 0.82rem; font-weight: 600;
+      color: var(--text-body); box-shadow: 0 10px 24px -20px rgba(59, 130, 246, 0.35);
+    }
+
+    .screensaver {
+      position: relative; display: flex; align-items: center; justify-content: center; width: 100%; height: 100%; overflow: hidden;
+    }
+    .screensaver__backdrop {
+      position: absolute; inset: 0;
+      background: linear-gradient(180deg, rgba(248, 250, 252, 0.94) 0%, rgba(255, 255, 255, 0.98) 42%, rgba(248, 250, 252, 0.94) 100%);
+    }
+    .screensaver__texture {
+      position: absolute; inset: 0; opacity: 0.22;
+      background-image: radial-gradient(circle at 1px 1px, rgba(15, 23, 42, 0.08) 1px, transparent 0);
+      background-size: 18px 18px;
+    }
+    .screensaver__blocks {
+      position: absolute; inset: 0;
+    }
+    .screensaver__block {
+      position: absolute; border-radius: 0.4rem; background: rgba(255, 255, 255, 0.78);
+      box-shadow: 0 18px 36px -30px rgba(15, 23, 42, 0.12);
+    }
+    .screensaver__hero {
+      position: relative; z-index: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      width: 100%; height: 100%; max-width: 62rem; padding: 0.5rem 2rem 2.5rem; text-align: center;
+    }
+    .screensaver__logo-wrap {
+      position: absolute; top: 0; left: 0; display: flex; width: 100%; justify-content: flex-start; padding: 0.25rem 0.5rem 0;
+    }
+    .screensaver__logo-image {
+      width: 8.8rem; height: auto; object-fit: contain; filter: drop-shadow(0 18px 30px rgba(17, 40, 108, 0.18));
+    }
+    .screensaver__headline {
+      max-width: 8.8ch; margin: 0; font-family: var(--font-ui); font-size: clamp(4.8rem, 8vw, 6.4rem); font-weight: 600;
+      line-height: 0.9; letter-spacing: -0.08em; color: #11286c; text-wrap: balance;
+    }
+    .screensaver__body {
+      max-width: 32rem; margin: 1.75rem 0 0; font-size: clamp(1.1rem, 2vw, 1.3rem); line-height: 1.4; color: #334155;
+    }
+    .screensaver__cta {
+      display: inline-flex; margin-top: 2rem; padding: 0.95rem 2.25rem; border-radius: 999px; background: #11286c;
+      color: white; font-size: 1.05rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase;
+      box-shadow: 0 18px 34px -24px rgba(17, 40, 108, 0.45);
+    }
+    .screensaver__prompt {
+      max-width: 26rem; margin: 2.5rem 0 0; font-size: clamp(1.05rem, 2vw, 1.25rem); line-height: 1.25; color: #0f172a;
+    }
+
+    .wave-card-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; margin-top: 22px;
+    }
+    .wave-card {
+      padding: 18px; border-color: rgba(226, 232, 240, 0.72); background: rgba(255, 255, 255, 0.78);
+    }
+    .wave-card__label {
+      margin: 0; font-size: 0.74rem; font-weight: 700; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-soft);
+    }
+    .wave-card__title { margin: 10px 0 0; font-size: 1rem; line-height: 1.4; color: var(--text-body); }
+    .wave-card canvas { width: 100%; height: 96px; margin-top: 14px; display: block; }
+
+    .error-banner {
+      width: min(420px, 100%); padding: 14px 16px; border: 1px solid #fecdd3; border-radius: 18px; background: var(--rose-soft);
+      color: var(--rose); font-size: 0.92rem; line-height: 1.7;
+    }
+    .countdown-wrap { width: min(18rem, 100%); margin-top: 8px; }
+    .countdown-bar { position: relative; width: 100%; height: 10px; overflow: hidden; border-radius: 999px; background: #e2e8f0; }
+    .countdown-fill { position: absolute; inset-block: 0; left: 0; width: 56%; border-radius: 999px; background: #0ea5e9; }
+    .countdown-label { margin: 12px 0 0; font-size: 0.82rem; font-weight: 600; color: var(--text-soft); text-align: center; }
+
+    .utility-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 18px; margin-top: 22px;
+    }
+    .utility-card { padding: 18px; border: 1px solid var(--line-card); border-radius: 24px; background: rgba(248, 250, 252, 0.7); }
+    .utility-card__title { margin: 0 0 12px; font-size: 1rem; }
+    .footer-note { margin-top: 22px; color: var(--text-body); line-height: 1.8; }
+
+    @media (max-width: 1100px) {
+      .page { width: min(100vw - 24px, 1480px); padding-top: 20px; }
+      .shell-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 780px) {
+      .hero { flex-direction: column; align-items: flex-start; }
+      .section, .shell__header, .shell__footer, .shell__timeline { padding-inline: 18px; }
+      .shell { min-height: 700px; }
+      .screensaver__hero { padding-inline: 1.25rem; }
+      .screensaver__logo-wrap { justify-content: center; padding-inline: 0; }
+      .screensaver__headline { max-width: 9.4ch; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <section class="hero">
+      <div>
+        <p class="section__eyebrow">Standalone HTML Catalog</p>
+        <h1 class="hero__title">Way Finder UI Catalog</h1>
+        <p class="hero__body">
+          Este ficheiro compila os elementos UI que o sistema Journey consegue produzir hoje, usando a linguagem visual atual do frontend. O catalogo inclui todos os kinds de card suportados, os tres estados de preview de mapa, os estados base da shell do kiosk e os elementos auxiliares que aparecem durante a sessao.
+        </p>
+      </div>
+      <div class="hero__chips">
+        <span class="hero__chip">poi</span>
+        <span class="hero__chip">event</span>
+        <span class="hero__chip">image</span>
+        <span class="hero__chip">map</span>
+        <span class="hero__chip">weather</span>
+        <span class="hero__chip">summary</span>
+        <span class="hero__chip">qr</span>
+      </div>
+    </section>
+
+    <section class="section">
+      <p class="section__eyebrow">Journey Items</p>
+      <h2 class="section__title">Todos os cards renderizaveis</h2>
+      <p class="section__body">
+        A Journey aceita sete tipos de item. O mapa tem tres estados visuais reais no codigo atual: fallback sem localizacao, vista aproximada por label e vista com coordenadas resolvidas.
+      </p>
+      <div id="catalog-grid" class="section__grid"></div>
+    </section>
+
+    <section class="section">
+      <p class="section__eyebrow">Shell States</p>
+      <h2 class="section__title">Estados principais do kiosk</h2>
+      <p class="section__body">
+        Aqui ficam quatro composicoes completas da shell atual: hero screensaver em idle, listening com estado vazio, active com cards reais de weather, POI, event e map, e farewell com resumo e QR final.
+      </p>
+      <div id="shell-grid" class="shell-grid"></div>
+    </section>
+
+    <section class="section">
+      <p class="section__eyebrow">Waveform</p>
+      <h2 class="section__title">Estados visuais da onda de voz</h2>
+      <p class="section__body">
+        A waveform atual varia entre idle, listening e speaking, com paletas e amplitudes diferentes. O desenho abaixo usa canvas standalone para espelhar esse comportamento visual.
+      </p>
+      <div class="wave-card-grid">
+        <article class="wave-card">
+          <p class="wave-card__label">Idle</p>
+          <p class="wave-card__title">Estado calmo, cinza e de baixa amplitude.</p>
+          <canvas data-waveform="idle"></canvas>
+        </article>
+        <article class="wave-card">
+          <p class="wave-card__label">Listening</p>
+          <p class="wave-card__title">A ouvir, com energia azul e pulsacao mais visivel.</p>
+          <canvas data-waveform="listening"></canvas>
+        </article>
+        <article class="wave-card">
+          <p class="wave-card__label">Speaking</p>
+          <p class="wave-card__title">A falar, com tom ciano e maior intensidade.</p>
+          <canvas data-waveform="speaking"></canvas>
+        </article>
+      </div>
+    </section>
+
+    <section class="section">
+      <p class="section__eyebrow">Utilities</p>
+      <h2 class="section__title">Elementos auxiliares produzidos pela shell</h2>
+      <div class="utility-grid">
+        <article class="utility-card">
+          <h3 class="utility-card__title">Error Banner</h3>
+          <div class="error-banner">Ligacao ao backend perdida. A tentar recuperar.</div>
+        </article>
+        <article class="utility-card">
+          <h3 class="utility-card__title">Countdown de farewell</h3>
+          <div class="countdown-wrap">
+            <div class="countdown-bar"><div class="countdown-fill"></div></div>
+            <p class="countdown-label">Regressa ao inicio em 8s</p>
+          </div>
+        </article>
+        <article class="utility-card">
+          <h3 class="utility-card__title">Status chip</h3>
+          <div class="chip-row">
+            <span class="status-row"><span class="status-dot"></span>Pronto</span>
+            <span class="status-row"><span class="status-dot"></span>A ouvir</span>
+            <span class="status-row"><span class="status-dot"></span>A falar</span>
+            <span class="status-row status-row--disconnected"><span class="status-dot status-dot--disconnected"></span>Desligado</span>
+          </div>
+        </article>
+      </div>
+      <p class="footer-note">
+        Este catalogo reflete o que o frontend realmente monta hoje. O idle usa um hero screensaver com logo em imagem, enquanto os restantes estados mostram cards reais de weather, image, map, POI, summary e QR.
+      </p>
+    </section>
+  </main>
+
+  <script>
+    const scenicSvg = encodeSvg(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 600">
+        <defs>
+          <linearGradient id="sky" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#dbeafe" />
+            <stop offset="54%" stop-color="#f0fdf4" />
+            <stop offset="100%" stop-color="#dcfce7" />
+          </linearGradient>
+        </defs>
+        <rect width="480" height="600" rx="40" fill="url(#sky)" />
+        <ellipse cx="250" cy="470" rx="240" ry="130" fill="rgba(34,197,94,0.18)" />
+        <path d="M-20 430C70 360 200 332 320 370C390 392 445 435 510 470V640H-20Z" fill="#8fd7aa" />
+        <path d="M-20 490C90 430 225 420 340 452C400 468 460 494 510 530V640H-20Z" fill="#4aa168" opacity="0.55" />
+      </svg>
+    `)
+
+    const stoneSvg = encodeSvg(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 600">
+        <defs>
+          <linearGradient id="sky2" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#dbeafe" />
+            <stop offset="65%" stop-color="#f8fafc" />
+            <stop offset="100%" stop-color="#e2e8f0" />
+          </linearGradient>
+        </defs>
+        <rect width="480" height="600" rx="40" fill="url(#sky2)" />
+        <path d="M0 470C80 410 160 370 245 360C324 350 390 370 480 440V600H0Z" fill="#94a3b8" opacity="0.4" />
+        <path d="M90 430L170 278L216 326L260 230L330 356L392 292L422 436Z" fill="#64748b" opacity="0.78" />
+        <circle cx="350" cy="140" r="48" fill="#fef3c7" opacity="0.95" />
+      </svg>
+    `)
+
+    const brandImageSrc = "/assets/way_finder.png"
+    const qrPayload = "https://wayfinder.pt/r/preview-xyz789"
+
+    const catalogItems = [
+      {
+        key: "poi",
+        label: "JourneyPoiItem",
+        kind: "poi",
+        note: "Card base com imagem, titulo e meta de localizacao ou categoria.",
+        focused: false,
+        item: {
+          title: "Monsanto",
+          location: "Idanha-a-Nova",
+          imageUrl: scenicSvg,
+          imageAttribution: "Imagem editorial de preview"
+        }
+      },
+      {
+        key: "image",
+        label: "JourneyImageItem",
+        kind: "image",
+        note: "Card base com media, caption e attribution.",
+        focused: false,
+        item: {
+          title: "Galeria da Aldeia Historica",
+          caption: "Vista panoramica e ruas em granito.",
+          imageUrl: stoneSvg,
+          imageAttribution: "Imagem editorial de preview"
+        }
+      },
+      {
+        key: "event",
+        label: "JourneyEventItem",
+        kind: "event",
+        note: "Card tall com eyebrow Agenda, tokens e resumo.",
+        focused: false,
+        item: {
+          title: "Festival do Queijo",
+          subTitle: "22 Mar • Seia • Gratis",
+          meta: "Degustacao de queijo regional, produtores locais e programa ao ar livre."
+        }
+      },
+      {
+        key: "weather",
+        label: "JourneyWeatherItem",
+        kind: "weather",
+        note: "Card compact com temperatura atual, sensacao, vento e previsao de 3 dias.",
+        focused: false,
+        item: {
+          title: "Hoje em Coimbra",
+          location: "Coimbra",
+          weatherLabel: "Ceu limpo",
+          currentTemperatureC: 22,
+          apparentTemperatureC: 24,
+          windSpeedKmh: 12,
+          dailyForecast: [
+            { label: "Hoje", max: 28, min: 14, weatherLabel: "Ceu limpo" },
+            { label: "Amanha", max: 24, min: 12, weatherLabel: "Pouco nublado" },
+            { label: "Qui", max: 21, min: 11, weatherLabel: "Chuva" }
+          ]
+        }
+      },
+      {
+        key: "map-coordinates",
+        label: "JourneyMapItem",
+        kind: "map",
+        note: "Estado com coordenadas resolvidas e chip de coordenadas validadas.",
+        focused: true,
+        item: {
+          title: "Rota sugerida",
+          location: "Monsanto",
+          latitude: 40.0405,
+          longitude: -7.1146
+        }
+      },
+      {
+        key: "map-approximate",
+        label: "JourneyMapItem",
+        kind: "map",
+        note: "Estado aproximado quando existe localizacao mas nao coordenadas.",
+        focused: false,
+        item: {
+          title: "Trilha do Castelo",
+          location: "Monsanto -> Idanha-a-Velha"
+        }
+      },
+      {
+        key: "map-fallback",
+        label: "JourneyMapItem",
+        kind: "map",
+        note: "Fallback quando nao existe localizacao precisa para vista cartografica.",
+        focused: false,
+        item: {
+          title: "Mapa sugerido"
+        }
+      },
+      {
+        key: "summary",
+        label: "JourneySummaryItem",
+        kind: "summary",
+        note: "Card wide de fecho com resumo textual e summaryUrl.",
+        focused: false,
+        item: {
+          title: "A tua visita ao Centro de Portugal",
+          description: "3 aldeias historicas, um trilho e um evento local preparados para levar no telemovel.",
+          summaryUrl: "https://wayfinder.pt/resumo/preview-xyz789"
+        }
+      },
+      {
+        key: "qr",
+        label: "JourneyQrItem",
+        kind: "qr",
+        note: "Card hero com QR final, descricao e texto curto do codigo.",
+        focused: false,
+        item: {
+          title: "Resumo da visita",
+          description: "Leva no telemovel todas as recomendacoes da visita.",
+          qrData: qrPayload
+        }
+      }
+    ]
+
+    const shellCards = {
+      weather: {
+        kind: "weather",
+        title: "Hoje em Coimbra",
+        location: "Coimbra",
+        weatherLabel: "Ceu limpo",
+        currentTemperatureC: 22,
+        apparentTemperatureC: 24,
+        windSpeedKmh: 12,
+        dailyForecast: [
+          { label: "Hoje", max: 28, min: 14, weatherLabel: "Ceu limpo" },
+          { label: "Amanha", max: 24, min: 12, weatherLabel: "Pouco nublado" },
+          { label: "Qui", max: 21, min: 11, weatherLabel: "Chuva" }
+        ]
+      },
+      poi: {
+        kind: "poi",
+        title: "Monsanto",
+        location: "Idanha-a-Nova",
+        imageUrl: scenicSvg
+      },
+      event: {
+        kind: "event",
+        title: "Mercado Medieval",
+        subTitle: "28 Mar • Obidos",
+        meta: "Animacao historica, artesanato e gastronomia local."
+      },
+      map: {
+        kind: "map",
+        title: "Trilha do Castelo",
+        location: "Monsanto",
+        latitude: 40.0405,
+        longitude: -7.1146
+      },
+      summary: {
+        kind: "summary",
+        title: "A tua visita ao Centro de Portugal",
+        description: "Monsanto, Serra da Estrela e um roteiro final pronto para levar.",
+        summaryUrl: "https://wayfinder.pt/resumo/demo-shell"
+      },
+      qr: {
+        kind: "qr",
+        title: "Resumo da visita",
+        description: "Scan para abrir o resumo completo no telemovel.",
+        qrData: qrPayload
+      }
+    }
+
+    const shellStates = [
+      {
+        key: "idle",
+        title: "Idle / hero screensaver",
+        status: "Desligado",
+        disconnected: true,
+        hideHeader: true,
+        timeline: renderIdleScreensaver(),
+        footer: renderWaveHolder("idle-shell", "idle")
+      },
+      {
+        key: "listening",
+        title: "Listening / greeting",
+        status: "A ouvir",
+        timeline: renderEmptyState({
+          eyebrow: "Boas-vindas",
+          title: "Estou a preparar a conversa.",
+          description: "Fale para comecar.",
+          highlights: ["A ouvir", "Resposta em tempo real"]
+        }),
+        footer: renderWaveHolder("listening-shell", "listening")
+      },
+      {
+        key: "active",
+        title: "Active timeline",
+        status: "A falar",
+        timeline: renderTimeline([
+          shellCards.weather,
+          shellCards.poi,
+          shellCards.event,
+          shellCards.map
+        ], 1),
+        footer: renderWaveHolder("speaking-shell", "speaking")
+      },
+      {
+        key: "farewell",
+        title: "Farewell / carry",
+        status: "A falar",
+        timeline: renderTimeline([
+          shellCards.poi,
+          shellCards.summary,
+          shellCards.qr
+        ], 1),
+        footer: `
+          <div class="countdown-wrap">
+            <div class="countdown-bar"><div class="countdown-fill"></div></div>
+            <p class="countdown-label">Regressa ao inicio em 8s</p>
+          </div>
+        `
+      }
+    ]
+
+    document.getElementById("catalog-grid").innerHTML = catalogItems.map(renderCatalogCard).join("")
+    document.getElementById("shell-grid").innerHTML = shellStates.map(renderShellCard).join("")
+
+    document.querySelectorAll("canvas[data-qr]").forEach((canvas) => {
+      drawQr(canvas, canvas.dataset.qr || qrPayload)
+    })
+
+    drawConnectors()
+    initWaveforms()
+
+    function renderCatalogCard(entry) {
+      return `
+        <article class="catalog-card">
+          <div class="catalog-card__head">
+            <div><div class="kind-tag">${entry.kind}</div></div>
+            <p class="catalog-card__label">${entry.label}</p>
+          </div>
+          ${renderJourneyCard(entry.item, entry.focused)}
+          <p class="catalog-card__label" style="margin: 14px 0 0;">${entry.note}</p>
+        </article>
+      `
+    }
+
+    function renderShellCard(shell) {
+      const statusClass = shell.disconnected ? "status-row status-row--disconnected" : "status-row"
+      const dotClass = shell.disconnected ? "status-dot status-dot--disconnected" : "status-dot"
+      const headerClass = shell.hideHeader ? "shell__header shell__header--idle" : "shell__header"
+      return `
+        <article class="shell">
+          <header class="${headerClass}">
+            <div>
+              <p class="section__eyebrow">${shell.title}</p>
+              <img class="shell__brand-image" src="${brandImageSrc}" alt="Way Finder" />
+            </div>
+            <div class="${statusClass}"><span class="${dotClass}"></span>${shell.status}</div>
+          </header>
+          <div class="shell__timeline">${shell.timeline}</div>
+          <div class="shell__footer">${shell.footer}</div>
+        </article>
+      `
+    }
+
+    function renderJourneyCard(item, isFocused) {
+      const variant = getVariant(item.kind)
+      const focusedClass = isFocused ? "journey-card--focused" : ""
+      const baseClass = `journey-card journey-card--${variant} ${focusedClass}`.trim()
+
+      if (item.kind === "event") {
+        return `
+          <article class="${baseClass}" data-journey-kind="event">
+            <p class="journey-card__eyebrow">Agenda</p>
+            <h3 class="journey-card__title">${escapeHtml(item.title)}</h3>
+            <div class="event-tokens">${getEventTokens(item.subTitle).map((token) => `<span class="event-token">${escapeHtml(token)}</span>`).join("")}</div>
+            <p class="journey-card__summary">${escapeHtml(item.meta || "")}</p>
+          </article>
+        `
+      }
+
+      if (item.kind === "summary") {
+        return `
+          <article class="${baseClass}" data-journey-kind="summary">
+            <p class="journey-card__eyebrow">Resumo</p>
+            <h3 class="journey-card__title">${escapeHtml(item.title)}</h3>
+            ${item.description ? `<p class="journey-card__summary">${escapeHtml(item.description)}</p>` : ""}
+            ${item.summaryUrl ? `<p class="summary-link">${escapeHtml(getSummaryUrlLabel(item.summaryUrl))}</p>` : ""}
+          </article>
+        `
+      }
+
+      if (item.kind === "qr") {
+        return `
+          <article class="${baseClass}" data-journey-kind="qr">
+            <p class="journey-card__eyebrow">Levar</p>
+            <h3 class="journey-card__title">${escapeHtml(item.title)}</h3>
+            <div class="qr-card__panel">
+              <canvas class="qr-card__canvas" data-qr="${escapeAttribute(item.qrData || qrPayload)}"></canvas>
+              ${item.description ? `<p class="qr-card__caption">${escapeHtml(item.description)}</p>` : ""}
+              ${item.qrData ? `<p class="qr-card__code">${escapeHtml(item.qrData)}</p>` : ""}
+            </div>
+          </article>
+        `
+      }
+
+      if (item.kind === "weather") {
+        const days = (item.dailyForecast || []).slice(0, 3)
+        const primaryDay = days[0]
+        return `
+          <article class="${baseClass} weather-card" data-journey-kind="weather">
+            <h3 class="journey-card__title">${escapeHtml(item.title)}</h3>
+            <div class="weather-card__current">
+              <div class="weather-card__main">
+                <span class="weather-icon" aria-hidden="true"></span>
+                <div class="weather-card__summary-wrap">
+                  <span class="weather-card__summary">${escapeHtml(item.weatherLabel)}</span>
+                  ${item.location ? `<span class="journey-card__meta" style="margin-top:0;">${escapeHtml(item.location)}</span>` : ""}
+                </div>
+              </div>
+              <div style="text-align:right;">
+                <span class="weather-card__temp">${Math.round(item.currentTemperatureC)}&deg;</span>
+                ${primaryDay ? `<p class="journey-card__weather-range">${Math.round(primaryDay.max)}&deg; / ${Math.round(primaryDay.min)}&deg;</p>` : ""}
+              </div>
+            </div>
+            <p class="journey-card__weather-feels">Sensacao ${Math.round(item.apparentTemperatureC)}&deg; • Vento ${Math.round(item.windSpeedKmh)} km/h</p>
+            <div class="weather-card__grid">
+              ${days.map((day) => `
+                <div class="weather-card__day">
+                  <p class="weather-card__day-label">${escapeHtml(day.label)}</p>
+                  <p class="weather-card__day-temps">${Math.round(day.max)}&deg; / ${Math.round(day.min)}&deg;</p>
+                  <p class="journey-card__weather-day-meta">${escapeHtml(day.weatherLabel)}</p>
+                </div>
+              `).join("")}
+            </div>
+          </article>
+        `
+      }
+
+      if (item.kind === "map") {
+        return `
+          <article class="${baseClass}" data-journey-kind="map">
+            ${renderMapPreview(item)}
+            <h3 class="journey-card__title">${escapeHtml(item.title)}</h3>
+            ${item.location ? `<p class="journey-card__meta">${escapeHtml(item.location)}</p>` : ""}
+          </article>
+        `
+      }
+
+      const meta = item.kind === "poi" ? item.location : ""
+      const caption = item.kind === "image" ? item.caption : ""
+      const attribution = item.kind === "poi" || item.kind === "image" ? item.imageAttribution : ""
+      return `
+        <article class="${baseClass}" data-journey-kind="${item.kind}">
+          ${renderMedia(item)}
+          <h3 class="journey-card__title">${escapeHtml(item.title)}</h3>
+          ${meta ? `<p class="journey-card__meta">${escapeHtml(meta)}</p>` : ""}
+          ${caption ? `<p class="journey-card__caption">${escapeHtml(caption)}</p>` : ""}
+          ${attribution ? `<p class="journey-card__attribution">${escapeHtml(attribution)}</p>` : ""}
+        </article>
+      `
+    }
+
+    function renderMedia(item) {
+      const src = item.thumbnailUrl || item.imageUrl
+      if (!src) {
+        return `<div class="media-frame"><div class="media-scenic"></div></div>`
+      }
+      return `
+        <div class="media-frame">
+          <img class="media-image" src="${src}" alt="${escapeAttribute(item.title)}" />
+        </div>
+      `
+    }
+
+    function renderMapPreview(item) {
+      const hasCoordinates = Number.isFinite(item.latitude) && Number.isFinite(item.longitude)
+      const hasLocation = Boolean((item.location || "").trim())
+
+      if (!hasCoordinates && !hasLocation) {
+        return `
+          <div class="media-frame">
+            <div class="map-preview map-preview--fallback" data-map-state="fallback">
+              <div class="map-preview__fallback">
+                <p class="map-preview__eyebrow">Mapa</p>
+                <div class="map-preview__fallback-icon" aria-hidden="true">
+                  <svg viewBox="0 0 32 32" width="28" height="28" fill="none">
+                    <path d="M 7 10 L 16 7 L 25 10 L 25 22 L 16 25 L 7 22 Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"></path>
+                    <path d="M 16 7 V 25" stroke="currentColor" stroke-width="1.5"></path>
+                  </svg>
+                </div>
+                <p class="map-preview__fallback-title">Localizacao por confirmar</p>
+                <p class="map-preview__fallback-body">Sem localizacao precisa para gerar vista cartografica.</p>
+              </div>
+            </div>
+          </div>
+        `
+      }
+
+      const eyebrow = hasCoordinates ? "Coordenadas validadas" : "Localizacao sugerida"
+      const scale = hasCoordinates ? `${item.latitude.toFixed(4)}, ${item.longitude.toFixed(4)}` : "Vista aproximada"
+      const hint = hasCoordinates
+        ? `Coordenadas confirmadas para contextualizar ${item.title.toLowerCase()}.`
+        : `Vista aproximada de ${item.location} para contextualizar ${item.title.toLowerCase()}.`
+
+      return `
+        <div class="media-frame">
+          <div class="map-preview" data-map-state="${hasCoordinates ? "coordinates" : "approximate"}">
+            <div class="map-preview__contour"></div>
+            <div class="map-preview__contour--secondary"></div>
+            <div class="map-preview__grid"></div>
+            <div class="map-preview__marker-cluster" aria-hidden="true">
+              <span class="map-preview__marker-pulse"></span>
+              <span class="map-preview__marker"></span>
+            </div>
+            <div class="map-preview__top">
+              <p class="map-preview__eyebrow">${escapeHtml(eyebrow)}</p>
+              <span class="map-preview__scale">${escapeHtml(scale)}</span>
+            </div>
+            <div class="map-preview__bottom">
+              <p class="map-preview__label">${escapeHtml(item.location || "Ponto resolvido")}</p>
+              <p class="map-preview__hint">${escapeHtml(hint)}</p>
+            </div>
+          </div>
+        </div>
+      `
+    }
+
+    function renderTimeline(items, focusedIndex) {
+      return `
+        <div class="timeline-frame">
+          <svg class="journey-connector" data-connector="${items.length}"></svg>
+          <div class="timeline-track">
+            ${items.map((item, index) => `
+              <div class="timeline-slot offset-${Math.min(index, 3)}">
+                ${renderJourneyCard(item, index === focusedIndex)}
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `
+    }
+
+    function renderEmptyState(copy) {
+      return `
+        <div class="timeline-frame">
+          <div class="empty-state">
+            <p class="empty-state__eyebrow">${escapeHtml(copy.eyebrow)}</p>
+            <h3 class="empty-state__title">${escapeHtml(copy.title)}</h3>
+            <p class="empty-state__description">${escapeHtml(copy.description)}</p>
+            <div class="empty-state__chips">
+              ${copy.highlights.map((highlight) => `<span class="empty-state__chip">${escapeHtml(highlight)}</span>`).join("")}
+            </div>
+          </div>
+        </div>
+      `
+    }
+
+    function renderIdleScreensaver() {
+      return `
+        <div class="timeline-frame">
+          <div class="screensaver">
+            <div class="screensaver__backdrop"></div>
+            <div class="screensaver__texture"></div>
+            <div class="screensaver__blocks">
+              <div class="screensaver__block" style="left:4%; top:2%; width:18%; height:18%;"></div>
+              <div class="screensaver__block" style="left:2%; top:28%; width:22%; height:26%;"></div>
+              <div class="screensaver__block" style="left:28%; top:6%; width:48%; height:34%;"></div>
+              <div class="screensaver__block" style="right:2%; top:0; width:28%; height:24%;"></div>
+              <div class="screensaver__block" style="right:6%; top:70%; width:24%; height:12%;"></div>
+              <div class="screensaver__block" style="left:34%; top:48%; width:34%; height:18%;"></div>
+              <div class="screensaver__block" style="left:38%; top:72%; width:32%; height:12%;"></div>
+            </div>
+            <div class="screensaver__hero">
+              <div class="screensaver__logo-wrap">
+                <img class="screensaver__logo-image" src="${brandImageSrc}" alt="Way Finder" />
+              </div>
+              <h3 class="screensaver__headline">Mais Portugal para Descobrir</h3>
+              <p class="screensaver__body">Explore novos lugares e leve consigo um itinerario personalizado.</p>
+              <div class="screensaver__cta">Falar comigo</div>
+              <p class="screensaver__prompt">Aproxime-se do ecra para iniciar uma nova conversa</p>
+            </div>
+          </div>
+        </div>
+      `
+    }
+
+    function renderWaveHolder(id, state) {
+      return `<canvas data-waveform-inline="${escapeAttribute(id)}" data-waveform-state="${escapeAttribute(state)}" width="480" height="96"></canvas>`
+    }
+
+    function drawConnectors() {
+      document.querySelectorAll("svg[data-connector]").forEach((svg) => {
+        const count = Number(svg.dataset.connector || 0)
+        const points = getJourneyPoints(count)
+        svg.setAttribute("viewBox", "0 0 100 100")
+        svg.innerHTML = ""
+        if (!points.length) return
+
+        const segments = getSegments(points)
+        const footprints = getFootprints(segments)
+        segments.forEach((segment) => {
+          const path = document.createElementNS("http://www.w3.org/2000/svg", "path")
+          path.setAttribute("d", buildSegmentPath(segment.start, segment.end))
+          path.setAttribute("fill", "none")
+          path.setAttribute("stroke", "transparent")
+          path.setAttribute("stroke-width", "1")
+          svg.appendChild(path)
+        })
+        footprints.forEach((point) => {
+          const group = document.createElementNS("http://www.w3.org/2000/svg", "g")
+          group.setAttribute("transform", `translate(${point.x} ${point.y}) rotate(${point.rotation})`)
+
+          const sole = document.createElementNS("http://www.w3.org/2000/svg", "path")
+          sole.setAttribute("d", point.isLeft
+            ? "M -2.4 -7.5 Q -3.4 -5 -3.2 -1.5 Q -3 1.5 -0.8 2.8 Q 0.5 3.4 2.4 1.5 Q 3.4 -0.5 3.1 -4 Q 2.7 -7.5 0.2 -8.5 Q -1.3 -8.8 -2.4 -7.5 Z"
+            : "M 2.4 -7.5 Q 3.4 -5 3.2 -1.5 Q 3 1.5 0.8 2.8 Q -0.5 3.4 -2.4 1.5 Q -3.4 -0.5 -3.1 -4 Q -2.7 -7.5 -0.2 -8.5 Q 1.3 -8.8 2.4 -7.5 Z")
+          sole.setAttribute("fill", "rgb(51 65 85 / 0.9)")
+          sole.setAttribute("opacity", "0.9")
+
+          const heel = document.createElementNS("http://www.w3.org/2000/svg", "ellipse")
+          heel.setAttribute("cx", "0")
+          heel.setAttribute("cy", "7")
+          heel.setAttribute("rx", "1.8")
+          heel.setAttribute("ry", "2.2")
+          heel.setAttribute("fill", "rgb(51 65 85 / 0.9)")
+          heel.setAttribute("opacity", "0.9")
+
+          group.appendChild(sole)
+          group.appendChild(heel)
+          svg.appendChild(group)
+        })
+      })
+    }
+
+    function initWaveforms() {
+      document.querySelectorAll("canvas[data-waveform], canvas[data-waveform-inline]").forEach((canvas) => {
+        const state = canvas.dataset.waveform || canvas.dataset.waveformState || "idle"
+        drawWaveform(canvas, state)
+      })
+    }
+
+    function drawWaveform(canvas, state) {
+      const ctx = canvas.getContext("2d")
+      const width = canvas.clientWidth || canvas.width || 480
+      const height = canvas.clientHeight || canvas.height || 96
+      const ratio = window.devicePixelRatio || 1
+      canvas.width = Math.floor(width * ratio)
+      canvas.height = Math.floor(height * ratio)
+      ctx.setTransform(ratio, 0, 0, ratio, 0, 0)
+      ctx.clearRect(0, 0, width, height)
+
+      const palette = getWavePalette(state)
+      const centerY = height / 2
+      const baseWidths = [2.5, 2, 1.5, 1]
+      const opacities = [0.8, 0.5, 0.3, 0.15]
+      const baseAmplitude = state === "speaking" ? 18 : state === "listening" ? 15 : 8
+      const time = state === "speaking" ? 4.4 : state === "listening" ? 2.8 : 1.2
+
+      for (let lineIndex = 3; lineIndex >= 0; lineIndex -= 1) {
+        const points = []
+        const freq = 2 + lineIndex * 0.62
+        const phase = time + lineIndex * 0.9
+        const amplitude = baseAmplitude * (0.72 + lineIndex * 0.12)
+        const stepCount = Math.ceil(width / 2)
+
+        for (let i = 0; i <= stepCount; i += 1) {
+          const x = (i / stepCount) * width
+          const n = x / width
+          const dist = Math.abs(n - 0.5) * 2
+          const taper = Math.pow(Math.max(0, Math.cos((dist * Math.PI) / 2)), 4)
+          const primary = Math.sin(freq * n * Math.PI * 2 + phase)
+          const secondary = Math.sin(freq * 1.5 * n * Math.PI * 2 + phase * 1.3) * 0.3
+          const tertiary = Math.sin(freq * 0.5 * n * Math.PI * 2 - phase * 0.7) * 0.15
+          const y = centerY + (primary + secondary + tertiary) * amplitude * taper
+          points.push({ x, y })
+        }
+
+        ctx.beginPath()
+        points.forEach((point, index) => {
+          if (index === 0) ctx.moveTo(point.x, point.y)
+          else ctx.lineTo(point.x, point.y)
+        })
+        ctx.lineTo(width, centerY)
+        ctx.lineTo(0, centerY)
+        ctx.closePath()
+        ctx.globalAlpha = Math.min(0.55, opacities[lineIndex] * (state === "idle" ? 0.18 : state === "listening" ? 0.28 : 0.34))
+        ctx.fillStyle = palette.secondary
+        ctx.fill()
+
+        ctx.beginPath()
+        points.forEach((point, index) => {
+          if (index === 0) ctx.moveTo(point.x, point.y)
+          else ctx.lineTo(point.x, point.y)
+        })
+        ctx.globalAlpha = opacities[lineIndex]
+        ctx.strokeStyle = palette.primary
+        ctx.lineWidth = baseWidths[lineIndex] * (state === "idle" ? 1 : state === "listening" ? 1.35 : 1.55)
+        ctx.lineCap = "round"
+        ctx.lineJoin = "round"
+        ctx.stroke()
+      }
+      ctx.globalAlpha = 1
+    }
+
+    function drawQr(canvas, text) {
+      const ctx = canvas.getContext("2d")
+      const size = canvas.width = canvas.clientWidth || 192
+      canvas.height = size
+      ctx.fillStyle = "#ffffff"
+      ctx.fillRect(0, 0, size, size)
+
+      const modules = 29
+      const quiet = 3
+      const cell = size / (modules + quiet * 2)
+      const seed = hashCode(text)
+
+      function drawFinder(mx, my) {
+        const x = (mx + quiet) * cell
+        const y = (my + quiet) * cell
+        ctx.fillStyle = "#111827"
+        ctx.fillRect(x, y, cell * 7, cell * 7)
+        ctx.fillStyle = "#ffffff"
+        ctx.fillRect(x + cell, y + cell, cell * 5, cell * 5)
+        ctx.fillStyle = "#111827"
+        ctx.fillRect(x + cell * 2, y + cell * 2, cell * 3, cell * 3)
+      }
+
+      drawFinder(0, 0)
+      drawFinder(modules - 7, 0)
+      drawFinder(0, modules - 7)
+
+      for (let y = 0; y < modules; y += 1) {
+        for (let x = 0; x < modules; x += 1) {
+          const inFinder =
+            (x < 7 && y < 7) ||
+            (x >= modules - 7 && y < 7) ||
+            (x < 7 && y >= modules - 7)
+          if (inFinder) continue
+          if (!pseudoBit(seed, x, y)) continue
+          ctx.fillStyle = "#111827"
+          ctx.fillRect((x + quiet) * cell, (y + quiet) * cell, cell, cell)
+        }
+      }
+    }
+
+    function getWavePalette(state) {
+      if (state === "listening") return { primary: "rgba(14,165,233,0.88)", secondary: "rgba(125,211,252,0.48)" }
+      if (state === "speaking") return { primary: "rgba(8,145,178,0.9)", secondary: "rgba(103,232,249,0.5)" }
+      return { primary: "rgba(71,85,105,0.56)", secondary: "rgba(148,163,184,0.34)" }
+    }
+
+    function getVariant(kind) {
+      if (kind === "weather") return "compact"
+      if (kind === "event") return "tall"
+      if (kind === "summary") return "wide"
+      if (kind === "qr") return "hero"
+      return "base"
+    }
+
+    function getEventTokens(subTitle) {
+      return (subTitle || "").split("•").map((token) => token.trim()).filter(Boolean)
+    }
+
+    function getSummaryUrlLabel(url) {
+      try {
+        const parsed = new URL(url)
+        return `${parsed.host}${parsed.pathname}`
+      } catch {
+        return url
+      }
+    }
+
+    function getJourneyPoints(count) {
+      if (count <= 0) return []
+      const usable = Math.min(count, 4)
+      const centers = Array.from({ length: usable }, (_, index) => ((index + 0.5) / usable) * 100)
+      const offsets = [56, 44, 60, 48]
+      return centers.map((x, index) => ({ x, y: offsets[index % offsets.length] }))
+    }
+
+    function buildSegmentPath(start, end) {
+      const controlOffset = (end.x - start.x) * 0.35
+      return `M ${start.x} ${start.y} C ${start.x + controlOffset} ${start.y}, ${end.x - controlOffset} ${end.y}, ${end.x} ${end.y}`
+    }
+
+    function getSegments(points) {
+      return points.slice(0, -1).map((start, index) => {
+        const end = points[index + 1]
+        const controlOffset = (end.x - start.x) * 0.35
+        return {
+          start,
+          control1: { x: start.x + controlOffset, y: start.y },
+          control2: { x: end.x - controlOffset, y: end.y },
+          end
+        }
+      })
+    }
+
+    function getPointOnCubicBezier(t, segment) {
+      const mt = 1 - t
+      const mt2 = mt * mt
+      const mt3 = mt2 * mt
+      const t2 = t * t
+      const t3 = t2 * t
+      return {
+        x: mt3 * segment.start.x + 3 * mt2 * t * segment.control1.x + 3 * mt * t2 * segment.control2.x + t3 * segment.end.x,
+        y: mt3 * segment.start.y + 3 * mt2 * t * segment.control1.y + 3 * mt * t2 * segment.control2.y + t3 * segment.end.y
+      }
+    }
+
+    function getTangentOnCubicBezier(t, segment) {
+      const mt = 1 - t
+      const mt2 = mt * mt
+      const t2 = t * t
+      const dx = 3 * mt2 * (segment.control1.x - segment.start.x) + 6 * mt * t * (segment.control2.x - segment.control1.x) + 3 * t2 * (segment.end.x - segment.control2.x)
+      const dy = 3 * mt2 * (segment.control1.y - segment.start.y) + 6 * mt * t * (segment.control2.y - segment.control1.y) + 3 * t2 * (segment.end.y - segment.control2.y)
+      return Math.atan2(dy, dx) * (180 / Math.PI)
+    }
+
+    function getFootprints(segments) {
+      const footprints = []
+      let footprintIndex = 0
+      segments.forEach((segment) => {
+        const distance = Math.hypot(segment.end.x - segment.start.x, segment.end.y - segment.start.y)
+        const steps = Math.max(4, Math.round(distance / 9))
+        for (let step = 1; step <= steps; step += 1) {
+          const t = step / (steps + 1)
+          const point = getPointOnCubicBezier(t, segment)
+          const angle = getTangentOnCubicBezier(t, segment)
+          const isLeft = footprintIndex % 2 === 0
+          const lateralOffset = isLeft ? -2.1 : 2.1
+          const radians = ((angle + 90) * Math.PI) / 180
+          const forwardRadians = (angle * Math.PI) / 180
+          const longitudinalOffset = isLeft ? -0.6 : 0.6
+          footprints.push({
+            x: point.x + Math.cos(radians) * lateralOffset + Math.cos(forwardRadians) * longitudinalOffset,
+            y: point.y + Math.sin(radians) * lateralOffset + Math.sin(forwardRadians) * longitudinalOffset,
+            rotation: angle + (isLeft ? -18 : 18),
+            isLeft
+          })
+          footprintIndex += 1
+        }
+      })
+      return footprints
+    }
+
+    function pseudoBit(seed, x, y) {
+      const value = Math.sin(seed * 0.001 + x * 12.9898 + y * 78.233) * 43758.5453
+      return Math.abs(value % 1) > 0.5
+    }
+
+    function hashCode(text) {
+      let hash = 0
+      for (let index = 0; index < text.length; index += 1) {
+        hash = ((hash << 5) - hash) + text.charCodeAt(index)
+        hash |= 0
+      }
+      return Math.abs(hash) + 1
+    }
+
+    function encodeSvg(svg) {
+      return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg.replace(/\s+/g, " ").trim())}`
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/\"/g, "&quot;")
+        .replace(/'/g, "&#39;")
+    }
+
+    function escapeAttribute(value) {
+      return escapeHtml(value)
+    }
+  </script>
+</body>
+</html>

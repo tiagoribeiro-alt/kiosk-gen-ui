@@ -1,0 +1,968 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>A sua visita ao Centro de Portugal — Way Finder</title>
+  <style>
+    /* ─── Design tokens (idênticos ao UI Catalog) ─────────────────────── */
+    :root {
+      color-scheme: light;
+      --bg-top: #f8fafc;
+      --bg-mid: #ffffff;
+      --bg-bottom: #f8fafc;
+      --text-strong: #0f172a;
+      --text-body: #475569;
+      --text-soft: #94a3b8;
+      --line-card: rgba(226, 232, 240, 0.72);
+      --surface: rgba(255, 255, 255, 0.88);
+      --shadow-card: 0 14px 32px -24px rgba(15, 23, 42, 0.2);
+      --shadow-focus: 0 20px 40px -24px rgba(15, 23, 42, 0.22);
+      --shadow-soft: 0 18px 36px -28px rgba(15, 23, 42, 0.2);
+      --rose: #be123c;
+      --rose-soft: #fff1f2;
+      --brand: #11286c;
+      --font-ui: "Segoe UI", "SF Pro Text", "Helvetica Neue", sans-serif;
+      --font-brand: "Iowan Old Style", "Palatino Linotype", "Book Antiqua", Georgia, serif;
+      --radius-shell: 32px;
+      --radius-card: 22px;
+      --radius-media: 16px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-ui);
+      color: var(--text-strong);
+      background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 56%, var(--bg-bottom) 100%);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img { display: block; max-width: 100%; height: auto; }
+
+    /* ─── Page layout ──────────────────────────────────────────────────── */
+    .page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 0 28px 72px;
+    }
+
+    /* ─── Header ───────────────────────────────────────────────────────── */
+    .summary-header {
+      position: relative;
+      overflow: hidden;
+      padding: 44px 44px 52px;
+      border-radius: 0 0 36px 36px;
+      margin-bottom: 48px;
+      background: linear-gradient(135deg, #020617 0%, #0b1f50 38%, #11286c 72%, #1a3a8a 100%);
+    }
+
+    .summary-header::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse at 85% 10%, rgba(96, 165, 250, 0.12) 0%, transparent 55%),
+        radial-gradient(ellipse at 10% 90%, rgba(99, 102, 241, 0.08) 0%, transparent 50%);
+      pointer-events: none;
+    }
+
+    .summary-header__brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin-bottom: 32px;
+    }
+
+    .summary-header__logo {
+      width: 7.5rem;
+      height: auto;
+      object-fit: contain;
+      filter: brightness(0) invert(1) opacity(0.92);
+    }
+
+    .summary-header__eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: rgba(147, 197, 253, 0.75);
+      margin-bottom: 12px;
+    }
+
+    .summary-header__title {
+      font-family: var(--font-brand);
+      font-size: clamp(2.1rem, 4.5vw, 3.2rem);
+      font-weight: 400;
+      line-height: 1.0;
+      letter-spacing: -0.04em;
+      color: #ffffff;
+      margin-bottom: 22px;
+    }
+
+    .summary-header__chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .summary-header__chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 8px 15px;
+      border-radius: 999px;
+      border: 1px solid rgba(147, 197, 253, 0.28);
+      background: rgba(255, 255, 255, 0.07);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.82);
+    }
+
+    .summary-header__date {
+      margin-top: 20px;
+      font-size: 0.8rem;
+      color: rgba(255, 255, 255, 0.32);
+    }
+
+    /* ─── Section containers ───────────────────────────────────────────── */
+    .section {
+      margin-bottom: 44px;
+    }
+
+    .section__eyebrow {
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--text-soft);
+      margin-bottom: 10px;
+    }
+
+    .section__title {
+      font-size: 1.55rem;
+      font-weight: 600;
+      letter-spacing: -0.04em;
+      line-height: 1.1;
+      color: var(--text-strong);
+      margin-bottom: 18px;
+    }
+
+    .divider {
+      height: 1px;
+      background: linear-gradient(to right, transparent, rgba(226, 232, 240, 0.9), transparent);
+      margin: 40px 0;
+    }
+
+    /* ─── Prose summary ────────────────────────────────────────────────── */
+    .prose {
+      font-size: 1.02rem;
+      line-height: 1.85;
+      color: var(--text-body);
+      max-width: 72ch;
+    }
+
+    .prose strong {
+      font-weight: 600;
+      color: var(--text-strong);
+    }
+
+    .prose + .highlights-list {
+      margin-top: 22px;
+    }
+
+    /* ─── Highlights list ──────────────────────────────────────────────── */
+    .highlights-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .highlights-list__item {
+      display: flex;
+      align-items: flex-start;
+      gap: 13px;
+      font-size: 0.97rem;
+      line-height: 1.65;
+      color: var(--text-body);
+    }
+
+    .highlights-list__dot {
+      flex-shrink: 0;
+      width: 7px;
+      height: 7px;
+      border-radius: 999px;
+      background: #0284c7;
+      margin-top: 8px;
+    }
+
+    /* ─── Journey Cards ────────────────────────────────────────────────── */
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(218px, 1fr));
+      gap: 16px;
+      margin-top: 4px;
+    }
+
+    .journey-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      padding: 16px;
+      border: 1px solid var(--line-card);
+      border-radius: var(--radius-card);
+      background: var(--surface);
+      box-shadow: var(--shadow-card);
+      backdrop-filter: blur(10px);
+      color: var(--text-strong);
+    }
+
+    .journey-card--base  { min-height: 13.8rem; }
+    .journey-card--compact { min-height: 12.2rem; }
+    .journey-card--tall  { min-height: 14.6rem; }
+    .journey-card--wide  { grid-column: span 2; min-height: 13rem; }
+    .journey-card--hero  { grid-column: span 2; min-height: 18rem; }
+
+    .journey-card__eyebrow {
+      margin-bottom: 11px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: #94a3b8;
+    }
+
+    .journey-card__title {
+      font-size: 1rem;
+      font-weight: 500;
+      line-height: 1.25;
+      letter-spacing: -0.02em;
+      color: var(--text-strong);
+    }
+
+    .journey-card__meta {
+      margin-top: 4px;
+      font-size: 0.88rem;
+      line-height: 1.5;
+      color: var(--text-body);
+    }
+
+    .journey-card__caption {
+      margin-top: 8px;
+      font-size: 0.82rem;
+      line-height: 1.55;
+      color: var(--text-body);
+    }
+
+    .journey-card__summary {
+      margin-top: 14px;
+      font-size: 0.94rem;
+      line-height: 1.7;
+      color: var(--text-body);
+    }
+
+    /* Event chip tokens */
+    .event-tokens {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .event-token {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 11px;
+      border-radius: 999px;
+      border: 1px solid #fde68a;
+      background: #fffbeb;
+      color: #92400e;
+      font-size: 0.74rem;
+      font-weight: 600;
+      line-height: 1;
+    }
+
+    /* Summary url pill */
+    .summary-link {
+      display: inline-flex;
+      align-items: center;
+      margin-top: 18px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      background: #f8fafc;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-body);
+      width: fit-content;
+    }
+
+    /* Media frame — POI / image */
+    .media-frame {
+      overflow: hidden;
+      border-radius: var(--radius-media);
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      background: rgba(248, 250, 252, 0.9);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.82);
+      margin-bottom: 12px;
+    }
+
+    .media-image {
+      aspect-ratio: 1 / 1;
+      width: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Weather card */
+    .weather-card { justify-content: space-between; }
+
+    .weather-card__current {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 8px;
+      margin-top: 4px;
+    }
+
+    .weather-card__left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .weather-icon {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 999px;
+      background: radial-gradient(circle at top, #fde68a 0%, #fef3c7 55%, #ffffff 100%);
+      box-shadow: 0 8px 18px -12px rgba(251, 191, 36, 0.8);
+    }
+
+    .weather-card__label { font-size: 0.9rem; font-weight: 600; line-height: 1.2; }
+    .weather-card__temp  { font-size: 2rem; font-weight: 400; line-height: 1; letter-spacing: -0.04em; }
+    .weather-card__range { margin-top: 2px; font-size: 0.82rem; color: var(--text-body); }
+    .weather-card__feels { margin-top: 8px; font-size: 0.78rem; color: var(--text-body); }
+
+    .weather-card__grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 4px;
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid rgba(226, 232, 240, 0.8);
+    }
+
+    .weather-card__day { text-align: center; }
+    .weather-card__day-label { font-size: 0.76rem; font-weight: 600; color: #334155; }
+    .weather-card__day-temps { margin-top: 3px; font-size: 0.75rem; color: var(--text-body); }
+    .weather-card__day-desc  { margin-top: 1px; font-size: 0.66rem; color: var(--text-soft); }
+
+    /* Map preview */
+    .map-preview {
+      position: relative;
+      aspect-ratio: 1 / 1;
+      overflow: hidden;
+      border-radius: var(--radius-media);
+      border: 1px solid rgba(255, 255, 255, 0.82);
+      background: linear-gradient(180deg, #f8fafc 0%, #f4f7fb 48%, #eef3f8 100%);
+      margin-bottom: 12px;
+    }
+
+    .map-preview::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0) 42%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, rgba(248, 250, 252, 0.24) 100%);
+    }
+
+    .map-preview__contour {
+      position: absolute;
+      left: -4%; top: 20%; width: 112%; height: 34%;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.5);
+    }
+
+    .map-preview__contour--secondary {
+      position: absolute;
+      left: -10%; top: 44%; width: 124%; height: 38%;
+      border-radius: 999px;
+      border: 1px solid rgba(148, 163, 184, 0.35);
+    }
+
+    .map-preview__grid {
+      position: absolute;
+      inset: 0;
+      opacity: 0.4;
+      background-image:
+        linear-gradient(to right, rgba(148, 163, 184, 0.12) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+      background-size: 18px 18px;
+    }
+
+    .map-preview__marker-cluster {
+      position: absolute;
+      left: 50%; top: 48%;
+      transform: translate(-50%, -50%);
+      display: flex; align-items: center; justify-content: center;
+      z-index: 1;
+    }
+
+    .map-preview__marker-pulse {
+      position: absolute;
+      width: 38px; height: 38px;
+      border-radius: 999px;
+      background: rgba(186, 230, 253, 0.6);
+      filter: blur(1px);
+    }
+
+    .map-preview__marker {
+      position: relative;
+      width: 14px; height: 14px;
+      border-radius: 999px;
+      border: 2px solid white;
+      background: #0284c7;
+      box-shadow: 0 5px 12px -6px rgba(2, 132, 199, 0.75);
+    }
+
+    .map-preview__top {
+      position: absolute;
+      inset-inline: 10px; top: 10px;
+      display: flex; justify-content: space-between; align-items: flex-start;
+      z-index: 1;
+    }
+
+    .map-preview__bottom {
+      position: absolute;
+      inset-inline: 10px; bottom: 10px;
+      z-index: 1;
+    }
+
+    .map-preview__eyebrow {
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.22em;
+      text-transform: uppercase; color: var(--text-body);
+    }
+
+    .map-preview__scale {
+      padding: 3px 8px;
+      border-radius: 999px;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      background: rgba(255, 255, 255, 0.88);
+      box-shadow: 0 6px 14px -12px rgba(15, 23, 42, 0.2);
+      font-size: 0.62rem; font-weight: 600; color: var(--text-body); white-space: nowrap;
+    }
+
+    .map-preview__label { font-size: 0.84rem; font-weight: 600; line-height: 1.25; color: #1e293b; }
+    .map-preview__hint  { margin-top: 3px; font-size: 0.7rem; line-height: 1.4; color: var(--text-body); }
+
+    /* QR panel */
+    .qr-card__panel {
+      overflow: hidden;
+      border-radius: var(--radius-media);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+      background: rgba(248, 250, 252, 0.9);
+      margin-top: 16px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 20px;
+      padding: 16px 18px;
+    }
+
+    .qr-card__canvas {
+      flex-shrink: 0;
+      width: 140px;
+      height: 140px;
+      border-radius: 16px;
+      background: white;
+      padding: 6px;
+      box-shadow: 0 8px 22px -16px rgba(15, 23, 42, 0.22);
+    }
+
+    .qr-card__text { flex: 1; }
+    .qr-card__caption { font-size: 0.92rem; line-height: 1.6; color: var(--text-body); }
+    .qr-card__code    { margin-top: 8px; font-size: 0.72rem; line-height: 1.45; color: #94a3b8; word-break: break-all; }
+
+    /* ─── Itinerary steps ──────────────────────────────────────────────── */
+    .itinerary-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .itinerary-step {
+      display: grid;
+      grid-template-columns: 44px 1fr;
+      gap: 0 14px;
+      padding-bottom: 22px;
+      position: relative;
+    }
+
+    .itinerary-step:not(:last-child)::before {
+      content: "";
+      position: absolute;
+      left: 21px; top: 38px; bottom: 0;
+      width: 2px;
+      background: linear-gradient(to bottom, rgba(226, 232, 240, 0.9) 0%, rgba(226, 232, 240, 0.2) 100%);
+    }
+
+    .itinerary-step__num {
+      width: 36px; height: 36px;
+      border-radius: 999px;
+      border: 1px solid rgba(226, 232, 240, 0.9);
+      background: white;
+      box-shadow: 0 6px 14px -10px rgba(15, 23, 42, 0.14);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.78rem; font-weight: 700; color: var(--brand);
+    }
+
+    .itinerary-step__body {
+      padding-top: 5px;
+    }
+
+    .itinerary-step__title {
+      font-size: 0.97rem;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--text-strong);
+    }
+
+    .itinerary-step__meta {
+      margin-top: 4px;
+      font-size: 0.85rem;
+      line-height: 1.65;
+      color: var(--text-body);
+    }
+
+    .itinerary-step__badge {
+      display: inline-flex;
+      margin-top: 8px;
+      padding: 3px 11px;
+      border-radius: 999px;
+      border: 1px solid rgba(186, 230, 253, 0.8);
+      background: rgba(240, 249, 255, 0.9);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #0369a1;
+    }
+
+    /* ─── Notice ───────────────────────────────────────────────────────── */
+    .notice {
+      padding: 16px 20px;
+      border-radius: 18px;
+      border: 1px solid rgba(186, 230, 253, 0.6);
+      background: rgba(240, 249, 255, 0.65);
+      font-size: 0.88rem;
+      line-height: 1.75;
+      color: #0c4a6e;
+      margin-bottom: 44px;
+    }
+
+    /* ─── Footer ───────────────────────────────────────────────────────── */
+    .summary-footer {
+      padding: 24px 0 0;
+      border-top: 1px solid rgba(226, 232, 240, 0.7);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    .summary-footer__brand { font-size: 0.84rem; font-weight: 600; color: var(--text-body); }
+    .summary-footer__legal { font-size: 0.74rem; color: var(--text-soft); }
+
+    /* ─── Responsive ───────────────────────────────────────────────────── */
+    @media (max-width: 640px) {
+      .summary-header { padding: 32px 22px 40px; border-radius: 0 0 26px 26px; margin-bottom: 28px; }
+      .page { padding-inline: 16px; }
+      .journey-card--wide,
+      .journey-card--hero { grid-column: span 1; }
+      .qr-card__panel { flex-direction: column; gap: 14px; text-align: center; }
+      .summary-footer { flex-direction: column; align-items: flex-start; gap: 6px; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ── Header ─────────────────────────────────────────────────────────── -->
+  <header class="summary-header">
+    <div class="summary-header__brand">
+      <img class="summary-header__logo" src="/assets/way_finder.png" alt="Way Finder" />
+    </div>
+    <p class="summary-header__eyebrow">Resumo da conversa</p>
+    <h1 class="summary-header__title">O seu roteiro pelo<br>Centro de Portugal</h1>
+    <div class="summary-header__chips">
+      <span class="summary-header__chip">3 locais</span>
+      <span class="summary-header__chip">1 evento cultural</span>
+      <span class="summary-header__chip">Roteiro 2 dias</span>
+    </div>
+    <p class="summary-header__date">18 de Março de 2026 · Centro de Portugal</p>
+  </header>
+
+  <main class="page">
+
+    <!-- ── O que descobriu ──────────────────────────────────────────────── -->
+    <section class="section">
+      <p class="section__eyebrow">O que descobriu</p>
+      <h2 class="section__title">Resumo da conversa</h2>
+
+      <div class="prose">
+        <p>
+          Durante a sua visita, explorámos juntos alguns dos <strong>destinos mais emblemáticos do Centro de Portugal</strong>. Começámos por <strong>Monsanto</strong>, em Idanha-a-Nova — uma das aldeias mais singulares do país, onde as casas foram construídas entre rochas graníticas gigantes e o Castelo templário domina a paisagem até Espanha. De seguida, passámos à <strong>Serra da Estrela</strong>, com foco nos trilhos acessíveis desta época e no Festival do Queijo da Serra em Seia, uma experiência gastronómica de entrada gratuita.
+        </p>
+      </div>
+
+      <ul class="highlights-list">
+        <li class="highlights-list__item">
+          <span class="highlights-list__dot" aria-hidden="true"></span>
+          <span><strong>Monsanto</strong> — aldeia histórica com casas em granito, Castelo templário do séc. XII e miradouro sobre a planície</span>
+        </li>
+        <li class="highlights-list__item">
+          <span class="highlights-list__dot" aria-hidden="true"></span>
+          <span><strong>Serra da Estrela</strong> — sugerido o Trilho das Quedas de Leandres (4,2 km, nível fácil); melhor horário: manhã</span>
+        </li>
+        <li class="highlights-list__item">
+          <span class="highlights-list__dot" aria-hidden="true"></span>
+          <span><strong>Festival do Queijo da Serra</strong> em Seia, 22 de Março — entrada gratuita, estacionamento disponível junto ao recinto</span>
+        </li>
+        <li class="highlights-list__item">
+          <span class="highlights-list__dot" aria-hidden="true"></span>
+          <span>Clima ameno em Coimbra e na região nos próximos 3 dias — ideal para deslocações de carro (Coimbra → Monsanto: ~2h)</span>
+        </li>
+      </ul>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ── Journey cards ────────────────────────────────────────────────── -->
+    <section class="section">
+      <p class="section__eyebrow">Elementos da visita</p>
+      <h2 class="section__title">Locais, eventos e contexto</h2>
+      <div class="cards-grid" id="cards-grid"></div>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ── Itinerary ────────────────────────────────────────────────────── -->
+    <section class="section">
+      <p class="section__eyebrow">Roteiro sugerido</p>
+      <h2 class="section__title">2 dias no Centro de Portugal</h2>
+      <ol class="itinerary-list">
+        <li class="itinerary-step">
+          <div class="itinerary-step__num">1</div>
+          <div class="itinerary-step__body">
+            <p class="itinerary-step__title">Coimbra — Chegada e visita ao centro histórico</p>
+            <p class="itinerary-step__meta">Universidade de Coimbra (Património UNESCO), Mosteiro de Santa Cruz e a Baixa histórica. Almoço no Mercado Municipal com cozinha regional.</p>
+            <span class="itinerary-step__badge">~3 h de visita</span>
+          </div>
+        </li>
+        <li class="itinerary-step">
+          <div class="itinerary-step__num">2</div>
+          <div class="itinerary-step__body">
+            <p class="itinerary-step__title">Monsanto — Aldeia histórica em granito</p>
+            <p class="itinerary-step__meta">2 h de condução de Coimbra. Castelo do séc. XII, ruas medievais e o miradouro sul com vista para Espanha. Recomendado visita ao final da tarde.</p>
+            <span class="itinerary-step__badge">~2 h de visita</span>
+          </div>
+        </li>
+        <li class="itinerary-step">
+          <div class="itinerary-step__num">3</div>
+          <div class="itinerary-step__body">
+            <p class="itinerary-step__title">Seia — Festival do Queijo da Serra (22 Mar)</p>
+            <p class="itinerary-step__meta">Degustação de Queijo Serra da Estrela DOP, artesanato local, cavalaria e animação ao ar livre. Entrada gratuita; programação das 10h às 19h.</p>
+            <span class="itinerary-step__badge">Evento gratuito</span>
+          </div>
+        </li>
+        <li class="itinerary-step">
+          <div class="itinerary-step__num">4</div>
+          <div class="itinerary-step__body">
+            <p class="itinerary-step__title">Serra da Estrela — Trilho das Quedas de Leandres</p>
+            <p class="itinerary-step__meta">Percurso circular de 4,2 km, desnível 180 m, nível fácil. Recomendado de manhã cedo. Temperatura prevista: 14 – 21 °C. Levar água e calçado adequado.</p>
+            <span class="itinerary-step__badge">4,2 km · Nível fácil</span>
+          </div>
+        </li>
+      </ol>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- ── Notice ───────────────────────────────────────────────────────── -->
+    <div class="notice">
+      Este resumo foi gerado automaticamente com base na sua conversa com o Way Finder. As informações sobre eventos e horários podem estar sujeitas a alteração — consulte os promotores locais para confirmação.
+    </div>
+
+    <!-- ── Footer ───────────────────────────────────────────────────────── -->
+    <footer class="summary-footer">
+      <p class="summary-footer__brand">Way Finder — Centro de Portugal</p>
+      <p class="summary-footer__legal">Gerado em 18 de Março de 2026 · turismodocentro.pt</p>
+    </footer>
+
+  </main>
+
+  <script>
+    // ─── SVG helpers ────────────────────────────────────────────────────────
+    function encodeSvg(svg) {
+      return "data:image/svg+xml," + encodeURIComponent(svg.trim())
+    }
+
+    const scenicMountainSvg = encodeSvg(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 600">
+        <defs>
+          <linearGradient id="sky1" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#dbeafe"/>
+            <stop offset="54%" stop-color="#f0fdf4"/>
+            <stop offset="100%" stop-color="#dcfce7"/>
+          </linearGradient>
+        </defs>
+        <rect width="480" height="600" rx="0" fill="url(#sky1)"/>
+        <ellipse cx="250" cy="475" rx="250" ry="135" fill="rgba(34,197,94,0.15)"/>
+        <path d="M-20 435C70 365 200 338 320 374C390 396 448 438 510 474V640H-20Z" fill="#8fd7aa"/>
+        <path d="M-20 495C90 435 228 424 342 456C402 472 462 498 510 535V640H-20Z" fill="#4aa168" opacity="0.52"/>
+        <circle cx="380" cy="95" r="44" fill="rgba(255,255,220,0.92)"/>
+      </svg>
+    `)
+
+    const stoneVillageSvg = encodeSvg(`
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 480 600">
+        <defs>
+          <linearGradient id="sky2" x1="0" x2="0" y1="0" y2="1">
+            <stop offset="0%" stop-color="#bfdbfe"/>
+            <stop offset="60%" stop-color="#f8fafc"/>
+            <stop offset="100%" stop-color="#e2e8f0"/>
+          </linearGradient>
+        </defs>
+        <rect width="480" height="600" rx="0" fill="url(#sky2)"/>
+        <path d="M0 480C85 415 170 378 253 368C332 358 395 378 480 448V600H0Z" fill="#94a3b8" opacity="0.38"/>
+        <path d="M88 438L168 286L215 334L260 238L332 360L394 298L424 442Z" fill="#64748b" opacity="0.75"/>
+        <rect x="182" y="354" width="24" height="60" rx="2" fill="#475569" opacity="0.9"/>
+        <rect x="238" y="342" width="30" height="72" rx="2" fill="#475569" opacity="0.85"/>
+        <rect x="300" y="366" width="20" height="50" rx="2" fill="#475569" opacity="0.75"/>
+        <circle cx="348" cy="132" r="50" fill="#fef3c7" opacity="0.9"/>
+      </svg>
+    `)
+
+    const qrPayload = "https://wayfinder.pt/r/visita-centro-2026-abc"
+
+    // ─── Card data ───────────────────────────────────────────────────────────
+    const cards = [
+      {
+        kind: "poi",
+        title: "Monsanto",
+        location: "Idanha-a-Nova, Castelo Branco",
+        imageUrl: "https://source.unsplash.com/featured/480x480/?monsanto,portugal,granite,village"
+      },
+      {
+        kind: "poi",
+        title: "Serra da Estrela",
+        location: "Guarda / Castelo Branco",
+        imageUrl: "https://source.unsplash.com/featured/480x480/?serra+da+estrela,mountain,snow,portugal"
+      },
+      {
+        kind: "event",
+        title: "Festival do Queijo da Serra",
+        subTitle: "22 Mar · Seia · Entrada livre",
+        meta: "Degustação de Queijo Serra da Estrela DOP, artesanato regional e animação ao ar livre. Das 10h às 19h."
+      },
+      {
+        kind: "weather",
+        title: "Hoje em Coimbra",
+        location: "Coimbra",
+        weatherLabel: "Céu limpo",
+        currentTemperatureC: 22,
+        apparentTemperatureC: 24,
+        windSpeedKmh: 12,
+        dailyForecast: [
+          { label: "Hoje",   max: 28, min: 14, desc: "Limpo"   },
+          { label: "Amanhã", max: 24, min: 12, desc: "Nublado" },
+          { label: "Qui",    max: 21, min: 11, desc: "Chuva"   }
+        ]
+      },
+      {
+        kind: "map",
+        title: "Rota para Monsanto",
+        location: "Coimbra → Monsanto",
+        latitude: 40.0405,
+        longitude: -7.1146
+      },
+    ]
+
+    // ─── Render ──────────────────────────────────────────────────────────────
+    document.getElementById("cards-grid").innerHTML = cards.map(renderCard).join("")
+    document.querySelectorAll("canvas[data-qr]").forEach((c) => drawQr(c, c.dataset.qr || qrPayload))
+
+    function renderCard(item) {
+      const v = variant(item.kind)
+      const base = `journey-card journey-card--${v}`
+
+      if (item.kind === "event") {
+        return `<article class="${base}" data-kind="event">
+          <p class="journey-card__eyebrow">Agenda</p>
+          <h3 class="journey-card__title">${x(item.title)}</h3>
+          <div class="event-tokens">
+            ${tokens(item.subTitle).map((t) => `<span class="event-token">${x(t)}</span>`).join("")}
+          </div>
+          <p class="journey-card__summary">${x(item.meta || "")}</p>
+        </article>`
+      }
+
+      if (item.kind === "summary") {
+        return `<article class="${base}" data-kind="summary">
+          <p class="journey-card__eyebrow">Resumo</p>
+          <h3 class="journey-card__title">${x(item.title)}</h3>
+          ${item.description ? `<p class="journey-card__summary">${x(item.description)}</p>` : ""}
+          ${item.summaryUrl ? `<span class="summary-link">${x(urlLabel(item.summaryUrl))}</span>` : ""}
+        </article>`
+      }
+
+      if (item.kind === "qr") {
+        return `<article class="${base}" data-kind="qr">
+          <p class="journey-card__eyebrow">Levar</p>
+          <h3 class="journey-card__title">${x(item.title)}</h3>
+          <div class="qr-card__panel">
+            <canvas class="qr-card__canvas" data-qr="${xa(item.qrData || qrPayload)}"></canvas>
+            <div class="qr-card__text">
+              ${item.description ? `<p class="qr-card__caption">${x(item.description)}</p>` : ""}
+              ${item.qrData    ? `<p class="qr-card__code">${x(item.qrData)}</p>`           : ""}
+            </div>
+          </div>
+        </article>`
+      }
+
+      if (item.kind === "weather") {
+        const days = (item.dailyForecast || []).slice(0, 3)
+        const d0 = days[0]
+        return `<article class="${base} weather-card" data-kind="weather">
+          <h3 class="journey-card__title">${x(item.title)}</h3>
+          <div class="weather-card__current">
+            <div class="weather-card__left">
+              <span class="weather-icon" aria-hidden="true"></span>
+              <div>
+                <p class="weather-card__label">${x(item.weatherLabel)}</p>
+                ${item.location ? `<p class="journey-card__meta" style="margin-top:0">${x(item.location)}</p>` : ""}
+              </div>
+            </div>
+            <div style="text-align:right">
+              <p class="weather-card__temp">${Math.round(item.currentTemperatureC)}&deg;</p>
+              ${d0 ? `<p class="weather-card__range">${Math.round(d0.max)}&deg;&thinsp;/&thinsp;${Math.round(d0.min)}&deg;</p>` : ""}
+            </div>
+          </div>
+          <p class="weather-card__feels">Sensação ${Math.round(item.apparentTemperatureC)}&deg;&thinsp;·&thinsp;Vento ${Math.round(item.windSpeedKmh)}&thinsp;km/h</p>
+          <div class="weather-card__grid">
+            ${days.map((d) => `
+              <div class="weather-card__day">
+                <p class="weather-card__day-label">${x(d.label)}</p>
+                <p class="weather-card__day-temps">${Math.round(d.max)}&deg;&thinsp;/&thinsp;${Math.round(d.min)}&deg;</p>
+                <p class="weather-card__day-desc">${x(d.desc || "")}</p>
+              </div>`).join("")}
+          </div>
+        </article>`
+      }
+
+      if (item.kind === "map") {
+        const hasCoords = Number.isFinite(item.latitude) && Number.isFinite(item.longitude)
+        const eyebrow  = hasCoords ? "Coordenadas validadas" : "Localização sugerida"
+        const scalelab = hasCoords ? `${item.latitude.toFixed(4)}, ${item.longitude.toFixed(4)}` : "Vista aproximada"
+        const hint     = hasCoords
+          ? `Posição confirmada — ${x(item.title)}`
+          : `Vista aproximada de ${x(item.location || "destino selecionado")}`
+
+        return `<article class="${base}" data-kind="map">
+          <div class="map-preview">
+            <div class="map-preview__contour"></div>
+            <div class="map-preview__contour--secondary"></div>
+            <div class="map-preview__grid"></div>
+            <div class="map-preview__marker-cluster" aria-hidden="true">
+              <span class="map-preview__marker-pulse"></span>
+              <span class="map-preview__marker"></span>
+            </div>
+            <div class="map-preview__top">
+              <p class="map-preview__eyebrow">${x(eyebrow)}</p>
+              <span class="map-preview__scale">${x(scalelab)}</span>
+            </div>
+            <div class="map-preview__bottom">
+              <p class="map-preview__label">${x(item.location || item.title)}</p>
+              <p class="map-preview__hint">${hint}</p>
+            </div>
+          </div>
+          <h3 class="journey-card__title">${x(item.title)}</h3>
+          ${item.location ? `<p class="journey-card__meta">${x(item.location)}</p>` : ""}
+        </article>`
+      }
+
+      /* poi / image */
+      const src = item.thumbnailUrl || item.imageUrl
+      return `<article class="${base}" data-kind="${x(item.kind)}">
+        <div class="media-frame">
+          ${src
+            ? `<img class="media-image" src="${src}" alt="${xa(item.title)}" />`
+            : `<div class="media-image" style="background:linear-gradient(180deg,#e0f2fe 0%,#dcfce7 100%)"></div>`
+          }
+        </div>
+        <h3 class="journey-card__title">${x(item.title)}</h3>
+        ${item.location ? `<p class="journey-card__meta">${x(item.location)}</p>` : ""}
+        ${item.caption  ? `<p class="journey-card__caption">${x(item.caption)}</p>` : ""}
+      </article>`
+    }
+
+    // ─── QR canvas ───────────────────────────────────────────────────────────
+    function drawQr(canvas, text) {
+      const ctx = canvas.getContext("2d")
+      const size = canvas.clientWidth || 140
+      canvas.width = size; canvas.height = size
+      ctx.fillStyle = "#ffffff"
+      ctx.fillRect(0, 0, size, size)
+      const modules = 29, quiet = 3
+      const cell = size / (modules + quiet * 2)
+      const seed = hash(text)
+
+      function finder(mx, my) {
+        const px = (mx + quiet) * cell, py = (my + quiet) * cell
+        ctx.fillStyle = "#111827"; ctx.fillRect(px, py, cell * 7, cell * 7)
+        ctx.fillStyle = "#ffffff"; ctx.fillRect(px + cell, py + cell, cell * 5, cell * 5)
+        ctx.fillStyle = "#111827"; ctx.fillRect(px + cell * 2, py + cell * 2, cell * 3, cell * 3)
+      }
+
+      finder(0, 0); finder(modules - 7, 0); finder(0, modules - 7)
+
+      for (let r = 0; r < modules; r++) {
+        for (let c = 0; c < modules; c++) {
+          const inf = (c < 7 && r < 7) || (c >= modules - 7 && r < 7) || (c < 7 && r >= modules - 7)
+          if (inf) continue
+          if (!bit(seed, c, r)) continue
+          ctx.fillStyle = "#111827"
+          ctx.fillRect((c + quiet) * cell, (r + quiet) * cell, cell, cell)
+        }
+      }
+    }
+
+    // ─── Utils ───────────────────────────────────────────────────────────────
+    function variant(kind) {
+      if (kind === "weather") return "compact"
+      if (kind === "event")   return "tall"
+      if (kind === "summary") return "wide"
+      if (kind === "qr")      return "hero"
+      return "base"
+    }
+
+    function tokens(s) {
+      return (s || "").split("·").concat((s || "").split("•")).flat()
+        .map((t) => t.trim()).filter(Boolean)
+    }
+
+    function urlLabel(url) {
+      try { const p = new URL(url); return p.host + p.pathname } catch { return url }
+    }
+
+    function x(s)  { return String(s ?? "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;") }
+    function xa(s) { return String(s ?? "").replace(/"/g,"&quot;").replace(/'/g,"&#39;") }
+    function hash(s) { let h = 0; for (let i = 0; i < s.length; i++) h = Math.imul(31, h) + s.charCodeAt(i) | 0; return h }
+    function bit(seed, cx, ry) { const k = ((seed ^ (cx * 374761393)) + ry * 1013904223) >>> 0; return (k ^ (k >>> 16)) % 3 !== 0 }
+  </script>
+</body>
+</html>
