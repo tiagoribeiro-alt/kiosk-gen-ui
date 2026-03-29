@@ -1,73 +1,61 @@
-# React + TypeScript + Vite
+# Kiosk Gen-UI Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+## Runtime WebSocket configuration
 
-Currently, two official plugins are available:
+The kiosk frontend resolves its WebSocket endpoint in this order:
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+1. `VITE_WS_URL` for a fully qualified `ws://` or `wss://` endpoint
+2. `VITE_BACKEND_URL` for an `http://` or `https://` backend base URL that will be converted to `/ws`
+3. local origin only when running on `localhost` or `127.0.0.1`
+4. `ws://localhost:8000/ws` as the final development fallback
 
-## React Compiler
+Examples:
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+VITE_BACKEND_URL=https://kiosk-backend-abc123-ew.a.run.app
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+```bash
+VITE_WS_URL=wss://kiosk-backend-abc123-ew.a.run.app/ws
+```
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Validation
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm run test
+npm run build
+```
+
+## Firebase deploy
+
+Create a local `.env` from `.env.example` only if you want a persistent local setup. For CI or one-off deploys, the deploy script injects runtime build vars directly:
+
+```powershell
+.\deploy-frontend.ps1 -BackendUrl "https://kiosk-gen-ui-backend-pechm6mdjq-ew.a.run.app"
+```
+
+By default, the script deploys to a Firebase Hosting preview channel on the same Firebase project so you get a test URL without touching the live site.
+
+Current preview with sensor toggle enabled:
+
+```text
+https://eventuais-app-pt--kiosk-gen-ui-test-ulotkfuu.web.app?sensorToggle=1
+```
+
+To choose a specific preview channel:
+
+```powershell
+.\deploy-frontend.ps1 -BackendUrl "https://kiosk-gen-ui-backend-pechm6mdjq-ew.a.run.app" -PreviewChannelId "kiosk-gen-ui-march-test"
+```
+
+If you need to override the websocket endpoint explicitly:
+
+```powershell
+.\deploy-frontend.ps1 -BackendUrl "https://kiosk-gen-ui-backend-pechm6mdjq-ew.a.run.app" -WebSocketUrl "wss://kiosk-gen-ui-backend-pechm6mdjq-ew.a.run.app/ws"
+```
+
+Only use a live deploy if you explicitly want to replace the current hosted site:
+
+```powershell
+.\deploy-frontend.ps1 -BackendUrl "https://kiosk-gen-ui-backend-pechm6mdjq-ew.a.run.app" -Live
 ```
