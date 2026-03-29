@@ -8,7 +8,7 @@
 
 Um quiosque interativo de turismo com voz, desenhado para stands de turismo (ex: BTL). Concretamente:
 
-1. Ecrã vertical (1080×1920) mostra um screensaver com regiões turísticas
+1. Ecrã horizontal (1920x1080) mostra um screensaver com regiões turísticas
 2. Sensor de presença detecta visitante → toca áudio de boas-vindas → liga-se ao Gemini
 3. Visitante fala por microfone (PCM 16kHz) → áudio vai via WebSocket → Gemini Live API
 4. Gemini responde com voz sintetizada (PCM 24kHz) + invoca tool calls que geram cards de POIs, eventos, imagens, mapas no ecrã
@@ -36,7 +36,7 @@ O sistema atual (~7700 linhas) funciona, mas:
 
 ### Objectivo do sistema
 
-O quiosque não é um chatbot genérico — é um **concierge de turismo com voz** que deve:
+O quiosque não é um chatbot genérico — é um **assistente de turismo por voz** que deve:
 
 1. **Acolher** — detectar presença, cumprimentar na língua certa, criar confiança
 2. **Descobrir** — entender o que o visitante procura (natureza? comida? história? eventos?)
@@ -86,6 +86,12 @@ Para a escala deste sistema (1-3 sessões simultâneas por quiosque), microservi
 | SSE para UI updates | WS já aberto para áudio, usar mesmo canal |
 | Session resumption (MVP) | Sessões duram 2-5 min, bem dentro do limite de 15 min |
 | Microserviços separados | Escala não justifica |
+
+### Reutilização do FlowTimeline Histórico
+
+O frontend anterior já validou um padrão de representação visual chamado **FlowTimeline**: cards heterogéneos (POIs, eventos, imagens, mapas) ligados por um trilho orgânico, com entrada progressiva e foco no item mais recente. Neste rebuild, esse padrão é tratado como **referência de produto e interação**, não como código para copiar literalmente.
+
+A decisão é reaproveitar a ideia, endurecer o contrato de dados e reimplementá-la como um módulo isolado no novo frontend. Assim preservamos a continuidade visual do sistema sem voltar a acoplar representação, sessão, áudio e transporte no mesmo sítio.
 
 ---
 
@@ -147,19 +153,22 @@ O modelo decide automaticamente quando usar search (dados dinâmicos) vs tools (
 │  │ Capture  │──│ (typed)   │──│ (declarative from    │  │
 │  │ Worklet  │  │           │  │  UISnapshot)         │  │
 │  │ 16kHz    │  │           │  │                      │  │
-│  └──────────┘  └─────┬─────┘  │ ┌────┐┌────┐┌─────┐ │  │
-│  ┌──────────┐        │        │ │POIs││Map ││Image│ │  │
-│  │ Audio    │        │        │ │    ││+Rts││+Glry│ │  │
-│  │ Playback │◄───────┤        │ └────┘└────┘└─────┘ │  │
-│  │ Worklet  │        │        │ ┌────┐┌────┐┌─────┐ │  │
-│  │ 24kHz    │        │        │ │Evts││Wthr││QR   │ │  │
-│  └──────────┘        │        │ └────┘└────┘└─────┘ │  │
+│  └──────────┘  └─────┬─────┘  │ ┌────┐┌────┐┌─────┐  │  │
+│  ┌──────────┐        │        │ │POIs││Map ││Image│  │  │
+│  │ Audio    │        │        │ │    ││+Rts││+Glry│  │  │
+│  │ Playback │◄───────┤        │ └────┘└────┘└─────┘  │  │
+│  │ Worklet  │        │        │ ┌────┐┌────┐┌─────┐  │  │
+│  │ 24kHz    │        │        │ │Evts││Wthr││QR   │  │  │
+│  └──────────┘        │        │ └────┘└────┘└─────┘  │  │
 │                      │        └──────────────────────┘  │
+│  ┌─────────────────────────────────────────────────┐    │
+│  │              VoiceWave (bottom bar)              │    │
+│  └─────────────────────────────────────────────────┘    │
 └──────────────────────┼──────────────────────────────────┘
                        │ WebSocket (audio + events)
                        │
 ┌──────────────────────┼──────────────────────────────────┐
-│              BACKEND (FastAPI + uvicorn)                 │
+│              BACKEND (FastAPI + uvicorn)                │
 │                      │                                  │
 │  ┌───────────────────▼───────────────────┐              │
 │  │         Session Manager               │              │
@@ -169,19 +178,19 @@ O modelo decide automaticamente quando usar search (dados dinâmicos) vs tools (
 │  │  - UIEvent emission                   │              │
 │  └──────────┬────────────────┬───────────┘              │
 │             │                │                          │
-│  ┌──────────▼──────┐  ┌─────▼──────────┐               │
-│  │  Tool Handlers  │  │  Data Services │               │
-│  │  (pure async)   │  │                │               │
-│  │                 │  │  - POI (OSM)   │               │
-│  │  get_pois()     │  │  - Images      │               │
-│  │  get_events()   │  │  - Events      │               │
-│  │  show_dest()    │  │  - Weather     │               │
-│  │  show_map()     │  │  - Routing     │               │
-│  │  show_route()   │  │  - Summary     │               │
-│  │  get_weather()  │  │  - QR          │               │
-│  │  show_gallery() │  │  - RAG         │               │
-│  │  end_session()  │  │                │               │
-│  └─────────────────┘  └────────────────┘               │
+│  ┌──────────▼──────┐  ┌─────▼──────────┐                │
+│  │  Tool Handlers  │  │  Data Services │                │
+│  │  (pure async)   │  │                │                │
+│  │                 │  │  - POI (OSM)   │                │
+│  │  get_pois()     │  │  - Images      │                │
+│  │  get_events()   │  │  - Events      │                │
+│  │  show_dest()    │  │  - Weather     │                │
+│  │  show_map()     │  │  - Routing     │                │
+│  │  show_route()   │  │  - Summary     │                │
+│  │  get_weather()  │  │  - QR          │                │
+│  │  show_gallery() │  │  - RAG         │                │
+│  │  end_session()  │  │                │                │
+│  └─────────────────┘  └────────────────┘                │
 │                                                         │
 │  ┌──────────────────────────┐ ┌────────────────────┐    │
 │  │  Google Search Grounding │ │ Config (YAML + .md)│    │
@@ -198,6 +207,21 @@ O modelo decide automaticamente quando usar search (dados dinâmicos) vs tools (
 │(Vertex)││        ││/Goog ││       ││        │
 └────────┘└────────┘└──────┘└───────┘└────────┘
 ```
+
+### Separação de Responsabilidades: Journey
+
+A camada de UI do frontend inclui um módulo dedicado chamado **Journey**. Este módulo é responsável apenas por apresentação: layout do percurso, renderização de cards, trilho/connector orgânico, indicador de passo e foco visual do item ativo.
+
+O `Session Manager`, o WebSocket client, o áudio e a máquina de estados continuam a ser camadas de orquestração. A Journey não conhece payloads crus do Gemini, frames de áudio, nem detalhes de transporte. Recebe apenas um modelo visual normalizado, por exemplo `JourneyScene` + `JourneyItem[]`, vindo de um adapter entre a sessão e a camada visual.
+
+| Responsabilidade | Onde reside |
+|------------------|-------------|
+| Sessão, tool calls, streaming e dispatch | Backend + Session Manager |
+| Estado global do kiosk (`idle`, `listening`, `active`, `farewell`) | XState / shell do frontend |
+| Normalização de snapshots/eventos para modelo visual | Journey adapter |
+| Layout, cards, connector, passos, animação e foco | Journey module |
+
+Esta separação evita sobreposição entre representação e sistema, melhora a testabilidade do frontend e permite evoluir a experiência visual sem tocar na lógica de transporte ou sessão.
 
 ---
 
@@ -221,7 +245,7 @@ class BaseEvent(BaseModel):
 | `audio_input` | FE→BE | `data: bytes (base64), mime_type: "audio/pcm;rate=16000"` | Áudio do microfone |
 | `transcript_input` | BE→FE | `text: str, is_final: bool` | Transcrição da fala do utilizador |
 | `transcript_output` | BE→FE | `text: str` | Transcrição da resposta do modelo |
-| `ui_snapshot` | BE→FE | `step: 1\|2\|3, pois: [], events: [], images: [], map: {}, weather: {}, route: {}` | Estado completo da UI |
+| `ui_snapshot` | BE→FE | `items: [], shell?: {}, step?: "discover"\|"plan"\|"carry", focus_item_id?: str` | Estado completo normalizado da UI para o Journey |
 | `ui_patch` | BE→FE | `op: "add"\|"remove"\|"replace", path: str, value: any` | Delta de UI (JSON Patch) |
 | `turn_complete` | BE→FE | — | Fim do turno do modelo |
 | `interrupted` | BE→FE | — | Modelo foi interrompido pelo utilizador |
@@ -314,9 +338,6 @@ kiosk-gen-ui/
 │   │       ├── cim/
 │   │       │   ├── config.yaml  ← voice, model, RAG corpus, branding, tools enabled
 │   │       │   └── system_prompt.md
-│   │       └── provere/
-│   │           ├── config.yaml
-│   │           └── system_prompt.md
 │   └── tests/
 │       ├── conftest.py
 │       ├── test_session.py
@@ -347,12 +368,11 @@ kiosk-gen-ui/
 │   │   │   ├── layout/
 │   │   │   │   ├── KioskShell.tsx       ← layout horizontal branco, 3 passos
 │   │   │   │   ├── StepIndicator.tsx    ← indicador de passo ativo
-│   │   │   │   └── StepPanel.tsx        ← container de cada passo
+│   │   │   │   ├── StepPanel.tsx        ← container de cada passo
+│   │   │   │   ├── VoiceWave.tsx        ← waveform animado de voz
+│   │   │   │   └── TranscriptBar.tsx    ← transcrição + wave, barra fixa no fundo
 │   │   │   ├── screensaver/
 │   │   │   │   └── Screensaver.tsx
-│   │   │   ├── chat/
-│   │   │   │   ├── TranscriptOverlay.tsx
-│   │   │   │   └── VoiceWave.tsx
 │   │   │   ├── content/
 │   │   │   │   ├── POICards.tsx         ← cards com skeleton loading
 │   │   │   │   ├── EventList.tsx
@@ -461,7 +481,7 @@ kiosk-gen-ui/
 # agents/cim/config.yaml
 agent_id: cim
 display_name: "Turismo Centro de Portugal"
-model: gemini-2.5-flash-native-audio-preview
+model: gemini-2.5-flash-native-audio-preview-12-2025
 voice: Aoede
 rag_corpus: "projects/{project}/locations/eu/ragCorpora/{corpus_id}"
 greeting_audio: "audio/greetings/cim_greeting.wav"
@@ -502,14 +522,17 @@ System prompt em `agents/cim/system_prompt.md` — carregado em runtime, não ha
 │ ① Descobrir      ② Planear        ③ Levar       │  ← step indicator
 ├─────────────────────────────────────────────────┤
 │                                                 │
-│  ┌─────────────┐  ┌────────────────────────────┐│
-│  │             │  │                            ││
-│  │  Transcript │  │    Conteúdo dinâmico       ││
-│  │  + Voice    │  │   (cards / mapa / galeria /││
-│  │  Wave       │  │     meteo / rota)          ││
-│  │             │  │                            ││
-│  └─────────────┘  └────────────────────────────┘│
-│                                                 │
+│  ┌──────────────────────────────────────────────┐│
+│  │                                             ││
+│  │         Conteúdo dinâmico                    ││
+│  │   (cards / mapa / galeria / meteo / rota)    ││
+│  │                                             ││
+│  │                                             ││
+│  └──────────────────────────────────────────────┘│
+│  ┌──────────────────────────────────────────────┐│
+│  │  "O visitante disse..."   ∿∿∿ VoiceWave ∿∿∿ ││
+│  │  Transcript + Wave — barra fixa no fundo     ││
+│  └──────────────────────────────────────────────┘│
 └─────────────────────────────────────────────────┘
 ```
 
@@ -518,6 +541,18 @@ System prompt em `agents/cim/system_prompt.md` — carregado em runtime, não ha
 - **Passo 3 — Levar**: QR code, resumo, email — o visitante sai com informação no telemóvel
 
 A transição entre passos é suave (animada) e guiada pelo fluxo natural da conversa, não por cliques.
+
+### Journey como módulo de apresentação
+
+O layout acima não deve ser implementado como um conjunto de componentes soltos diretamente ligados ao estado de sessão. A representação visual passa a viver num módulo **Journey** com boundary explícito.
+
+- `JourneyHost`: integra a cena visual no ecrã ACTIVE.
+- `JourneyAdapter`: traduz `ui_snapshot` e `ui_patch` para um modelo normalizado de apresentação.
+- `JourneyTimeline`: gere o fluxo esquerda→direita e o foco do item mais recente.
+- `JourneyConnector`: desenha o trilho orgânico e a metáfora dos passos.
+- `JourneyCard`: renderiza POI, evento, imagem, mapa, resumo e QR.
+
+Isto reaproveita a linguagem visual do FlowTimeline histórico, mas torna a implementação mais robusta e claramente separada da máquina, do áudio e do transporte.
 
 ### Visual feedback por estado
 
@@ -634,12 +669,13 @@ Para assegurar uma base robusta num ambiente de equipa de desenvolvimento profis
 - [ ] Implementar handlers: get_pois, get_events, show_destination, show_poi_image, show_map
 - [ ] Serviços de dados: OSM, Google Places, Unsplash/Pexels, Firestore
 - [ ] UISnapshot/UIPatch protocol
-- [ ] Componentes UI: POICards, EventList, HeroImage, MapView (com skeleton loading)
-- [ ] Layout horizontal branco com 3 passos
-- [ ] Step indicator sincronizado com estado
+- [ ] Journey adapter: normalização de `ui_snapshot` / `ui_patch` para `JourneyScene`
+- [ ] Componentes Journey: `JourneyTimeline`, `JourneyConnector`, `JourneyCard`, `JourneyStepIndicator`
+- [ ] Layout horizontal branco com 3 passos e boundary explícito entre shell e Journey
+- [ ] Step indicator sincronizado com estado sem acoplar regras visuais à máquina
 - [ ] Google Search Grounding configurado no setup da sessão
 > **Critério de Validação (DoD):**
-> Handlers backend unitariamente testados. Ao fazer pedido factual local, a framework UI propaga `Object.assign` via diff/patches sem perder o estado de componentes não focados no momento. Validação visual com Skeletons funcionando enquanto as tools não têm o dado pronto da API.
+> Handlers backend unitariamente testados. Ao fazer pedido factual local, a framework UI propaga `Object.assign` via diff/patches sem perder o estado de componentes não focados no momento. A Journey renderiza a partir de um modelo normalizado, com ordering/deduplicação determinísticos e Skeletons funcionando enquanto as tools não têm o dado pronto da API.
 
 ### M3 — Features novas + sessão completa
 - [ ] `get_weather` + WeatherCard (Open-Meteo, meio dia)
@@ -725,7 +761,7 @@ Nota: o total é mais próximo do original porque **estamos a adicionar funciona
 2. **3 novas tools**: `get_weather` (Open-Meteo, grátis), `show_route` (OpenRouteService + Leaflet Routing Machine para rotas multi-waypoint), `show_gallery` (carousel de fotos)
 3. **QR code no farewell**: visitante aponta o telemóvel e leva o resumo da conversa
 4. **Nova secção 11 — UX**: layout horizontal com 3 passos (Descobrir→Planear→Levar), princípios de design, feedback visual por estado, acessibilidade, estratégia de "levar informação"
-5. **Objectivo do sistema explícito**: concierge de turismo, não chatbot genérico
+5. **Objectivo do sistema explícito**: assistente de turismo por voz, não chatbot genérico
 6. **Milestones expandidos** para 5 fases (M3 absorve features novas, M4 foca em polish)
 7. **Novas APIs externas** no stack (Open-Meteo, OpenRouteService)
 8. **Novos componentes frontend**: `WeatherCard`, `ImageGallery`, `RouteInfo`, `QRCode`
@@ -739,7 +775,7 @@ Podes copiar o conteúdo acima para o ficheiro, ou se preferires que eu ative fe
 2. **3 novas tools**: `get_weather` (Open-Meteo, grátis), `show_route` (OpenRouteService + Leaflet Routing Machine para rotas multi-waypoint), `show_gallery` (carousel de fotos)
 3. **QR code no farewell**: visitante aponta o telemóvel e leva o resumo da conversa
 4. **Nova secção 11 — UX**: layout horizontal com 3 passos (Descobrir→Planear→Levar), princípios de design, feedback visual por estado, acessibilidade, estratégia de "levar informação"
-5. **Objectivo do sistema explícito**: concierge de turismo, não chatbot genérico
+5. **Objectivo do sistema explícito**: assistente de turismo por voz, não chatbot genérico
 6. **Milestones expandidos** para 5 fases (M3 absorve features novas, M4 foca em polish)
 7. **Novas APIs externas** no stack (Open-Meteo, OpenRouteService)
 8. **Novos componentes frontend**: `WeatherCard`, `ImageGallery`, `RouteInfo`, `QRCode`
